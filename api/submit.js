@@ -27,7 +27,7 @@ module.exports = async function handler(req, res) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: "Sheet1!A:E",
+      range: "A:E",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [
