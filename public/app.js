@@ -196,7 +196,7 @@ function renderChildModal(person) {
     </label>
   `).join("");
 
-  modalChildName.textContent = person.nome || "Criança";
+  modalChildName.textContent = "Detalhes da Inscrição";
   modalBody.innerHTML = `
     <div class="child-summary">
       <div class="child-avatar" aria-hidden="true">&#128522;</div>
