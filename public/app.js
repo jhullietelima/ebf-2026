@@ -4,17 +4,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-const STORAGE_KEY = "ebf2026-inscritos";
-const samplePeople = [
-  { id: "sample-1", nome: "Maria Eduarda", idade: "7", classe: "UP", responsavel: "Luciana Silva", telefone: "(91) 99999-9999", participante: "Visitante", createdAt: "20/05/2026 - 09:15" },
-  { id: "sample-2", nome: "Joao Pedro", idade: "5", classe: "START", responsavel: "Carlos Santos", telefone: "(91) 98888-1111", participante: "Membro", createdAt: "20/05/2026 - 09:22" },
-  { id: "sample-3", nome: "Ana Clara", idade: "10", classe: "GO", responsavel: "Paula Costa", telefone: "(91) 97777-2222", participante: "Visitante", createdAt: "20/05/2026 - 09:36" },
-  { id: "sample-4", nome: "Davi Lucas", idade: "6", classe: "UP", responsavel: "Marcos Lima", telefone: "(91) 96666-3333", participante: "Membro", createdAt: "20/05/2026 - 10:01" },
-  { id: "sample-5", nome: "Isabella Vitoria", idade: "8", classe: "UP", responsavel: "Renata Alves", telefone: "(91) 95555-4444", participante: "Visitante", createdAt: "20/05/2026 - 10:18" },
-  { id: "sample-6", nome: "Miguel Henrique", idade: "4", classe: "START", responsavel: "Bruna Rocha", telefone: "(91) 94444-5555", participante: "Membro", createdAt: "20/05/2026 - 10:24" },
-];
-
-let savedPeople = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let people = [];
+let lastLoadedAt = "";
 
 const toastEl = document.getElementById("toast");
 const offlineBanner = document.getElementById("offlineBanner");
@@ -23,15 +14,8 @@ const submitBtn = document.getElementById("submitBtn");
 const spinner = document.getElementById("spinner");
 const btnText = document.getElementById("btnText");
 const searchInput = document.getElementById("searchInput");
+const refreshBtn = document.getElementById("refreshBtn");
 let toastTimer;
-
-function allPeople() {
-  return [...savedPeople, ...samplePeople];
-}
-
-function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPeople));
-}
 
 function showToast(message, type = "success") {
   clearTimeout(toastTimer);
@@ -44,18 +28,11 @@ function updateOnlineStatus() {
   offlineBanner.classList.toggle("visible", !navigator.onLine);
 }
 
-function classIcon(classe) {
-  if (classe === "START") return "&#11088;";
-  if (classe === "GO") return "&#9812;";
-  return "&#128640;";
-}
-
 function pillClass(classe) {
   return classe === "START" ? "start" : classe === "GO" ? "go" : "";
 }
 
 function getCounts() {
-  const people = allPeople();
   const counts = {
     START: people.filter((p) => p.classe === "START").length,
     UP: people.filter((p) => p.classe === "UP").length,
@@ -107,32 +84,85 @@ function legendRow(className, label, count, total) {
 
 function renderList() {
   const term = searchInput.value.trim().toLowerCase();
-  const people = allPeople().filter((person) => person.nome.toLowerCase().includes(term));
+  const filtered = people.filter((person) => person.nome.toLowerCase().includes(term));
   const list = document.getElementById("personList");
 
   if (!people.length) {
+    list.innerHTML = `<article class="panel">Ainda nao ha inscritos carregados da planilha.</article>`;
+    return;
+  }
+
+  if (!filtered.length) {
     list.innerHTML = `<article class="panel">Nenhum inscrito encontrado.</article>`;
     return;
   }
 
-  list.innerHTML = people.map((person) => `
+  list.innerHTML = filtered.map((person) => `
     <article class="person-card">
       <div class="avatar">&#128522;</div>
       <div>
         <div class="person-name">${person.nome}</div>
-        <div class="person-age">${person.idade} anos - ${person.responsavel}</div>
+        <div class="person-age">${person.idade || "-"} anos - ${person.responsavel || "Responsavel nao informado"}</div>
+        <div class="person-age">${person.telefone || ""}</div>
       </div>
       <div>
         <span class="pill ${pillClass(person.classe)}">${person.classe}</span>
-        <span class="tag">${person.participante}</span>
+        <span class="tag">${person.participante || "Participante"}</span>
       </div>
     </article>
   `).join("");
 }
 
+function renderClassLists() {
+  const classList = document.getElementById("classLists");
+
+  classList.innerHTML = ["START", "UP", "GO"].map((classe) => {
+    const classPeople = people.filter((person) => person.classe === classe);
+    const names = classPeople.length
+      ? classPeople.map((person) => `<li>${person.nome} <span>${person.idade || "-"} anos</span></li>`).join("")
+      : "<li>Nenhum inscrito ainda</li>";
+
+    return `
+      <article class="panel class-panel">
+        <h3>${classe}</h3>
+        <strong>${classPeople.length} inscritos</strong>
+        <ul>${names}</ul>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderLoadedStatus() {
+  const status = document.getElementById("loadedStatus");
+  status.textContent = lastLoadedAt
+    ? `Dados carregados da planilha as ${lastLoadedAt}`
+    : "Carregando dados da planilha...";
+}
+
 function renderAll() {
   renderStats();
   renderList();
+  renderClassLists();
+  renderLoadedStatus();
+}
+
+async function loadPeople({ silent = false } = {}) {
+  try {
+    if (refreshBtn) refreshBtn.disabled = true;
+    const res = await fetch("/api/inscritos");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro ao carregar inscritos.");
+
+    people = data.people || [];
+    lastLoadedAt = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    renderAll();
+    if (!silent) showToast("Lista atualizada com a planilha.");
+  } catch (err) {
+    renderAll();
+    if (!silent) showToast(err.message || "Nao foi possivel carregar a planilha.", "error");
+  } finally {
+    if (refreshBtn) refreshBtn.disabled = false;
+  }
 }
 
 function setLoading(loading) {
@@ -143,7 +173,6 @@ function setLoading(loading) {
 
 function formDataToRecord() {
   return {
-    id: `local-${Date.now()}`,
     nome: form.nome.value.trim(),
     email: form.email.value,
     idade: form.idade.value.trim(),
@@ -152,14 +181,6 @@ function formDataToRecord() {
     telefone: form.telefone.value.trim(),
     participante: form.participante.value,
     observacao: "",
-    createdAt: new Date().toLocaleString("pt-BR", {
-      timeZone: "America/Belem",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).replace(",", " -"),
   };
 }
 
@@ -193,11 +214,9 @@ form.addEventListener("submit", async (event) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao salvar.");
 
-    savedPeople.unshift(record);
-    persist();
     form.reset();
-    renderAll();
-    showToast("Inscricao salva com sucesso.");
+    showToast(`Inscricao salva na aba ${record.classe}.`);
+    await loadPeople({ silent: true });
     document.getElementById("inscritos").scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     showToast(err.message || "Nao foi possivel salvar na planilha.", "error");
@@ -207,12 +226,13 @@ form.addEventListener("submit", async (event) => {
 });
 
 searchInput.addEventListener("input", renderList);
+refreshBtn.addEventListener("click", () => loadPeople());
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
 
 document.getElementById("exportBtn").addEventListener("click", () => {
   const header = ["Nome", "Idade", "Classe", "Responsavel", "Telefone", "Participante", "Data"];
-  const rows = allPeople().map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.createdAt]);
+  const rows = people.map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.createdAt]);
   const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
@@ -224,3 +244,4 @@ document.getElementById("exportBtn").addEventListener("click", () => {
 
 updateOnlineStatus();
 renderAll();
+loadPeople({ silent: true });
