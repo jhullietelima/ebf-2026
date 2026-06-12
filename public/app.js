@@ -116,6 +116,17 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function iconSvg(name) {
+  const icons = {
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path><path d="M8 14h3M13 14h3M8 17h3"></path></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.7-4 4.3-6 8-6s6.3 2 8 6"></path></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2.1Z"></path></svg>',
+    note: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"></path></svg>',
+  };
+  return icons[name] || "";
+}
+
 function renderStats() {
   const counts = getCounts();
   document.getElementById("homeStats").innerHTML = [
@@ -177,26 +188,37 @@ function renderList() {
 
 function renderChildModal(person) {
   const attendance = getPersonAttendance(person);
+  const participantClass = person.participante === "Visitante" ? "visitor" : "member";
   const checks = ATTENDANCE_DAYS.map((day) => `
     <label class="day-check">
-      <input type="checkbox" name="${day.key}" ${attendance[day.key] ? "checked" : ""} />
       <span>${day.label}</span>
+      <input type="checkbox" name="${day.key}" ${attendance[day.key] ? "checked" : ""} />
     </label>
   `).join("");
 
   modalChildName.textContent = person.nome || "Criança";
   modalBody.innerHTML = `
+    <div class="child-summary">
+      <div class="child-avatar" aria-hidden="true">&#128522;</div>
+      <div>
+        <div class="child-name">${escapeHtml(person.nome || "Criança")}</div>
+        <div class="child-tags">
+          <span class="child-chip group">${escapeHtml(person.classe || "-")}</span>
+          <span class="child-chip ${participantClass}">${escapeHtml(person.participante || "Participante")}</span>
+        </div>
+      </div>
+    </div>
     <div class="detail-grid">
-      <div class="detail-item"><span>Idade</span><strong>${escapeHtml(person.idade || "-")} anos</strong></div>
-      <div class="detail-item"><span>Grupo</span><strong>${escapeHtml(person.classe || "-")}</strong></div>
-      <div class="detail-item full"><span>Responsável</span><strong>${escapeHtml(person.responsavel || "Não informado")}</strong></div>
-      <div class="detail-item full"><span>Telefone</span><strong>${escapeHtml(person.telefone || "Não informado")}</strong></div>
-      <div class="detail-item full"><span>Observações</span><p>${escapeHtml(person.observacao || "Nenhuma observação registrada.")}</p></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("calendar")}</span><span>Idade</span><strong>${escapeHtml(person.idade || "-")} anos</strong></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("user")}</span><span>Responsável</span><strong>${escapeHtml(person.responsavel || "Não informado")}</strong></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("phone")}</span><span>Telefone</span><strong>${escapeHtml(person.telefone || "Não informado")}</strong></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("note")}</span><span>Observações</span><p>${escapeHtml(person.observacao || "Nenhuma observação registrada.")}</p></div>
     </div>
     <div class="attendance">
       <h4>Frequência</h4>
       <div class="attendance-grid">${checks}</div>
     </div>
+    <button class="edit-registration" type="button"><span aria-hidden="true">${iconSvg("edit")}</span>Editar Inscrição</button>
   `;
 }
 
