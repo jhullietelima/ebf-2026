@@ -85,6 +85,22 @@ function getPersonAttendance(person) {
   return { ...getEmptyAttendance(), ...(person.frequencia || {}) };
 }
 
+function parseCreatedAt(value) {
+  const text = String(value || "");
+  const match = text.match(/^(\d{2})\/(\d{2})\/(\d{4}),?\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (match) {
+    const [, day, month, year, hour, minute, second = "0"] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)).getTime();
+  }
+
+  const timestamp = Date.parse(text);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function sortByRecent(list) {
+  return [...list].sort((a, b) => parseCreatedAt(b.createdAt) - parseCreatedAt(a.createdAt));
+}
+
 function getCounts() {
   const counts = {
     START: people.filter((p) => p.classe === "START").length,
@@ -166,7 +182,7 @@ function legendRow(className, label, count, total) {
 
 function renderList() {
   const term = searchInput.value.trim().toLowerCase();
-  const filtered = people.filter((person) => person.nome.toLowerCase().includes(term));
+  const filtered = sortByRecent(people.filter((person) => person.nome.toLowerCase().includes(term)));
   const totalPages = Math.max(1, Math.ceil(filtered.length / PEOPLE_PAGE_SIZE));
 
   if (peoplePage >= totalPages) peoplePage = totalPages - 1;
