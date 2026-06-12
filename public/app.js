@@ -32,7 +32,19 @@ const listPager = document.getElementById("listPager");
 const prevPeoplePage = document.getElementById("prevPeoplePage");
 const nextPeoplePage = document.getElementById("nextPeoplePage");
 const peoplePageStatus = document.getElementById("peoplePageStatus");
+const loginForm = document.getElementById("loginForm");
+const loginBtn = document.getElementById("loginBtn");
+const loginSpinner = document.getElementById("loginSpinner");
+const loginBtnText = document.getElementById("loginBtnText");
+const loginToggle = document.getElementById("loginToggle");
+const newRegistrationLink = document.getElementById("newRegistrationLink");
+const trackingLink = document.getElementById("trackingLink");
+const accessForm = document.getElementById("accessForm");
+const accessBtn = document.getElementById("accessBtn");
+const accessSpinner = document.getElementById("accessSpinner");
+const accessBtnText = document.getElementById("accessBtnText");
 
+const AUTH_STORAGE_KEY = "ebf2026Session";
 const PEOPLE_PAGE_SIZE = 4;
 const ATTENDANCE_DAYS = [
   { key: "segunda", label: "Seg" },
@@ -47,6 +59,89 @@ function showToast(message, type = "success") {
   toastEl.textContent = message;
   toastEl.className = `toast ${type} show`;
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
+}
+
+function getSession() {
+  try {
+    const session = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || "null");
+    if (!session?.token || !session?.expiresAt || Date.now() > session.expiresAt) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      return null;
+    }
+    return session;
+  } catch (err) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+}
+
+function setSession(data) {
+  const expiresIn = Number(data.expiresIn) || 12 * 60 * 60 * 1000;
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+    token: data.token,
+    user: data.user,
+    expiresAt: Date.now() + expiresIn,
+  }));
+}
+
+function clearSession() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+function isAuthenticated() {
+  return Boolean(getSession());
+}
+
+function updateAuthView() {
+  const session = getSession();
+  document.body.classList.toggle("logged-in", Boolean(session));
+  document.body.classList.toggle("logged-out", !session);
+  loginToggle.textContent = session ? "Sair" : "Login";
+  loginToggle.href = session ? "#inicio" : "#login";
+  newRegistrationLink.textContent = session ? "+ Nova inscrição" : "Login para inscrever";
+  newRegistrationLink.href = session ? "#inscricao" : "#login";
+  trackingLink.href = session ? "#inscritos" : "#login";
+}
+
+function authHeaders() {
+  const session = getSession();
+  return session ? { Authorization: `Bearer ${session.token}` } : {};
+}
+
+async function authFetch(url, options = {}) {
+  const headers = {
+    ...(options.headers || {}),
+    ...authHeaders(),
+  };
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    clearSession();
+    updateAuthView();
+    document.getElementById("login").scrollIntoView({ behavior: "smooth" });
+  }
+
+  return response;
+}
+
+function requireLogin() {
+  if (isAuthenticated()) return true;
+  updateAuthView();
+  showToast("Faça login para continuar.", "error");
+  document.getElementById("login").scrollIntoView({ behavior: "smooth" });
+  return false;
+}
+
+function setLoginLoading(loading) {
+  loginBtn.disabled = loading;
+  loginSpinner.hidden = !loading;
+  loginBtnText.textContent = loading ? "Entrando..." : "Entrar";
+}
+
+function setAccessLoading(loading) {
+  accessBtn.disabled = loading;
+  accessSpinner.hidden = !loading;
+  accessBtnText.textContent = loading ? "Cadastrando..." : "Cadastrar acesso";
 }
 
 function updateOnlineStatus() {
@@ -290,7 +385,7 @@ function closeChildModal() {
 }
 
 async function saveAttendance(person) {
-  const res = await fetch("/api/frequencia", {
+  const res = await authFetch("/api/frequencia", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -304,6 +399,8 @@ async function saveAttendance(person) {
 }
 
 async function updateAttendance(day, checked) {
+  if (!requireLogin()) return;
+
   const person = people.find((item) => item.id === selectedPersonId);
   if (!person) return;
 
@@ -332,7 +429,9 @@ async function saveRegistrationEdit() {
   }
 
   try {
-    const res = await fetch("/api/inscricao", {
+    if (!requireLogin()) return;
+
+    const res = await authFetch("/api/inscricao", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -367,9 +466,16 @@ function renderAll() {
 }
 
 async function loadPeople({ silent = false } = {}) {
+  if (!isAuthenticated()) {
+    people = [];
+    lastLoadedAt = "";
+    renderAll();
+    return;
+  }
+
   try {
     if (refreshBtn) refreshBtn.disabled = true;
-    const res = await fetch("/api/inscritos");
+    const res = await authFetch("/api/inscritos");
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao carregar inscritos.");
 
@@ -418,8 +524,77 @@ function validate(record) {
   return "";
 }
 
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const usuario = loginForm.usuario.value.trim();
+  const senha = loginForm.senha.value.trim();
+
+  if (!usuario || !senha) {
+    showToast("Informe usuário e senha.", "error");
+    return;
+  }
+
+  setLoginLoading(true);
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario, senha }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Não foi possível entrar.");
+
+    setSession(data);
+    updateAuthView();
+    loginForm.reset();
+    showToast(`Bem-vindo, ${data.user?.nome || data.user?.usuario || "equipe"}.`);
+    await loadPeople({ silent: true });
+    document.getElementById("inscricao").scrollIntoView({ behavior: "smooth" });
+  } catch (err) {
+    showToast(err.message || "Não foi possível entrar.", "error");
+  } finally {
+    setLoginLoading(false);
+  }
+});
+
+accessForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const nome = accessForm.nome.value.trim();
+  const usuario = accessForm.usuario.value.trim();
+  const senha = accessForm.senha.value.trim();
+
+  if (!usuario || !senha) {
+    showToast("Informe usuário e senha para cadastrar o acesso.", "error");
+    return;
+  }
+
+  setAccessLoading(true);
+
+  try {
+    const res = await authFetch("/api/acessos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, usuario, senha }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Não foi possível cadastrar o acesso.");
+
+    accessForm.reset();
+    showToast("Acesso cadastrado na planilha.");
+  } catch (err) {
+    showToast(err.message || "Não foi possível cadastrar o acesso.", "error");
+  } finally {
+    setAccessLoading(false);
+  }
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  if (!requireLogin()) return;
 
   const record = formDataToRecord();
   const error = validate(record);
@@ -431,7 +606,7 @@ form.addEventListener("submit", async (event) => {
   setLoading(true);
 
   try {
-    const res = await fetch("/api/submit", {
+    const res = await authFetch("/api/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(record),
@@ -455,6 +630,18 @@ form.addEventListener("submit", async (event) => {
 searchInput.addEventListener("input", () => {
   peoplePage = 0;
   renderList();
+});
+loginToggle.addEventListener("click", (event) => {
+  if (!isAuthenticated()) return;
+
+  event.preventDefault();
+  clearSession();
+  updateAuthView();
+  people = [];
+  lastLoadedAt = "";
+  renderAll();
+  showToast("Sessão encerrada.");
+  document.getElementById("login").scrollIntoView({ behavior: "smooth" });
 });
 refreshBtn.addEventListener("click", () => loadPeople());
 idadeInput.addEventListener("input", updateClassPreview);
@@ -491,6 +678,7 @@ modalBody.addEventListener("click", (event) => {
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
 
+updateAuthView();
 updateOnlineStatus();
 updateClassPreview();
 renderAll();

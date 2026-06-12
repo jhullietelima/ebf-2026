@@ -1,4 +1,5 @@
 const { google } = require("googleapis");
+const { requireAuth } = require("../lib/auth");
 
 const CLASSES = ["START", "UP", "GO"];
 
@@ -42,6 +43,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  if (!requireAuth(req, res)) return;
 
   if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON || !process.env.SPREADSHEET_ID) {
     return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });

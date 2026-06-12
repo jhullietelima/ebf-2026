@@ -511,6 +511,46 @@
         gap: 18px;
       }
 
+      .logged-in .login-card,
+      .logged-out .protected-section {
+        display: none;
+      }
+
+      .logged-in .login-section .section-title p {
+        display: none;
+      }
+
+
+      .login-shell {
+        max-width: 560px;
+      }
+
+      .login-card {
+        padding: 18px;
+      }
+
+      .access-card {
+        padding: 18px;
+      }
+
+      .access-card h3 {
+        margin-bottom: 8px;
+        color: var(--orange);
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .access-card p {
+        margin-bottom: 14px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      #loginForm .primary-btn,
+      #accessForm .primary-btn {
+        width: 100%;
+      }
+
       .form-card {
         padding: 18px;
       }
@@ -1385,10 +1425,10 @@
       }
     </style>
   </head>
-  <body>
+  <body class="logged-out">
     <header class="site-header">
       <nav class="nav" aria-label="Navegação principal">
-        <a class="nav-cta" href="#inicio">Login</a>
+        <a class="nav-cta" href="#login" id="loginToggle">Login</a>
       </nav>
     </header>
 
@@ -1400,19 +1440,69 @@
             <h1 class="sr-only">EBF 2026 - Cristo, o Ungido de Deus</h1>
             <p class="hero-title">Central de Inscritos <strong>EBF 2026</strong></p>
             <div class="hero-actions">
-              <a class="primary-btn" href="#inscricao">+ Nova inscrição</a>
-              <a class="secondary-btn" href="#inscritos">&#9776; Ver inscritos</a>
+              <a class="primary-btn" href="#login" id="newRegistrationLink">Login para inscrever</a>
+              <a class="secondary-btn" href="#login" id="trackingLink">&#9776; Ver inscritos</a>
             </div>
           </div>
 
-          <div class="hero-panel" id="programacao">
+          <div class="hero-panel protected-section" id="programacao">
             <div class="stats-grid" id="homeStats"></div>
             <div class="participant-grid" id="participantStats"></div>
           </div>
         </div>
       </section>
 
-      <section class="section alt" id="inscricao">
+      <section class="section login-section" id="login">
+        <div class="section-inner login-shell">
+          <div class="section-title">
+            <p class="eyebrow">Acesso</p>
+            <h2 class="signup-title">Login da equipe</h2>
+            <p>Entre com o usuário cadastrado na planilha para liberar novas inscrições.</p>
+          </div>
+
+          <article class="panel login-card">
+            <form id="loginForm" novalidate>
+              <div class="field">
+                <label for="loginUsuario">Usuário</label>
+                <input id="loginUsuario" name="usuario" type="text" placeholder="Digite seu usuário" autocomplete="username" required />
+              </div>
+              <div class="field">
+                <label for="loginSenha">Senha</label>
+                <input id="loginSenha" name="senha" type="password" placeholder="Digite sua senha" autocomplete="current-password" required />
+              </div>
+              <button class="primary-btn" type="submit" id="loginBtn">
+                <span class="spinner" id="loginSpinner" hidden></span>
+                <span id="loginBtnText">Entrar</span>
+              </button>
+            </form>
+          </article>
+
+          <article class="panel access-card">
+            <h3>Cadastrar acesso</h3>
+            <p>Crie o primeiro acesso da equipe ou, depois de entrar, cadastre novos usuários autorizados.</p>
+            <form id="accessForm" novalidate>
+              <div class="field">
+                <label for="accessNome">Nome</label>
+                <input id="accessNome" name="nome" type="text" placeholder="Nome da pessoa" autocomplete="name" />
+              </div>
+              <div class="field">
+                <label for="accessUsuario">Usuário</label>
+                <input id="accessUsuario" name="usuario" type="text" placeholder="Crie um usuário" autocomplete="username" required />
+              </div>
+              <div class="field">
+                <label for="accessSenha">Senha</label>
+                <input id="accessSenha" name="senha" type="password" placeholder="Crie uma senha" autocomplete="new-password" required />
+              </div>
+              <button class="primary-btn" type="submit" id="accessBtn">
+                <span class="spinner" id="accessSpinner" hidden></span>
+                <span id="accessBtnText">Cadastrar acesso</span>
+              </button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section class="section alt protected-section" id="inscricao">
         <div class="section-inner form-shell">
           <div class="section-title">
             <p class="eyebrow">Nova inscrição</p>
@@ -1472,7 +1562,7 @@
         </div>
       </section>
 
-      <section class="section" id="inscritos">
+      <section class="section protected-section" id="inscritos">
         <div class="section-inner">
           <div class="section-title">
             <p class="eyebrow">Acompanhamento</p>

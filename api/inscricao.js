@@ -1,4 +1,5 @@
 const { google } = require("googleapis");
+const { requireAuth } = require("../lib/auth");
 
 const CLASSES = ["START", "UP", "GO"];
 const HEADERS = [
@@ -77,6 +78,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  if (!requireAuth(req, res)) return;
 
   const { id, classe, idade, observacao } = req.body || {};
   const oldClass = String(classe || "").toUpperCase();
