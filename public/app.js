@@ -226,6 +226,7 @@ function renderList() {
 function renderChildModal(person) {
   const attendance = getPersonAttendance(person);
   const participantClass = person.participante === "Visitante" ? "visitor" : "member";
+  const groupClass = String(person.classe || "").toLowerCase();
   const checks = ATTENDANCE_DAYS.map((day) => `
     <label class="day-check">
       <span>${day.label}</span>
@@ -240,7 +241,7 @@ function renderChildModal(person) {
       <div>
         <div class="child-name">${escapeHtml(person.nome || "Criança")}</div>
         <div class="child-tags">
-          <span class="child-chip group">${escapeHtml(person.classe || "-")}</span>
+          <span class="child-chip group ${groupClass}">${escapeHtml(person.classe || "-")}</span>
           <span class="child-chip ${participantClass}">${escapeHtml(person.participante || "Participante")}</span>
         </div>
       </div>
