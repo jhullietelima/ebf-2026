@@ -159,23 +159,21 @@ function renderStats() {
     statCard(totalIcon(), "Total geral", counts.total),
   ].join("");
 
-  document.getElementById("participantStats").innerHTML = [
-    statCard(participantIcon("visitor"), "Visitantes", counts.Visitante),
-    statCard(participantIcon("member"), "Membros", counts.Membro),
-  ].join("");
-
-  document.getElementById("reportTotal").textContent = counts.total;
-  document.getElementById("reportLegend").innerHTML = [
-    legendRow("", "START", counts.START, counts.total),
-    legendRow("up", "UP", counts.UP, counts.total),
-    legendRow("go", "GO", counts.GO, counts.total),
-  ].join("");
-}
-
-function legendRow(className, label, count, total) {
-  const base = total || 1;
-  const percent = Math.round((count / base) * 100);
-  return `<div class="legend-row"><span class="legend-dot ${className}"></span><span>${label}</span><strong>${count} (${percent}%)</strong></div>`;
+  document.getElementById("participantStats").innerHTML = `
+    <article class="stat-card participant-summary-card">
+      <div class="participant-summary-item">
+        <div class="stat-icon">${participantIcon("member")}</div>
+        <strong>Membros</strong>
+        <span class="number">${counts.Membro}</span>
+      </div>
+      <span class="participant-divider" aria-hidden="true"></span>
+      <div class="participant-summary-item">
+        <div class="stat-icon">${participantIcon("visitor")}</div>
+        <strong>Visitantes</strong>
+        <span class="number">${counts.Visitante}</span>
+      </div>
+    </article>
+  `;
 }
 
 function renderList() {

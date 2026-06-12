@@ -8,6 +8,9 @@
     <title>EBF 2026</title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
       *, *::before, *::after { box-sizing: border-box; }
       * { margin: 0; padding: 0; }
@@ -27,7 +30,7 @@
         --error: #d92318;
         --shadow: 0 18px 42px rgba(102, 58, 0, .18);
         --radius: 18px;
-        --font: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+        --font: "Lexend", "Segoe UI", system-ui, sans-serif;
       }
 
       html { scroll-behavior: smooth; }
@@ -103,10 +106,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background:
-          radial-gradient(circle at 22% 26%, rgba(255, 255, 255, .48) 0 44px, transparent 46px),
-          radial-gradient(circle at 78% 18%, rgba(255, 255, 255, .28) 0 30px, transparent 32px),
-          radial-gradient(circle at 86% 52%, rgba(123, 57, 7, .1) 0 11px, transparent 12px);
+        background: transparent;
         pointer-events: none;
       }
 
@@ -141,10 +141,10 @@
       }
 
       .event-logo {
-        width: min(92%, 430px);
+        width: min(74%, 344px);
         height: auto;
         display: block;
-        margin: 0 auto 4px;
+        margin: 0 auto -6px;
         filter: drop-shadow(0 18px 24px rgba(88, 42, 0, .22));
       }
 
@@ -154,8 +154,12 @@
         color: var(--brown);
         font-size: clamp(19px, 5.2vw, 28px);
         line-height: 1.08;
-        font-weight: 1000;
+        font-weight: 500;
         white-space: nowrap;
+      }
+
+      .hero-title strong {
+        font-weight: 900;
       }
 
       @media (max-width: 380px) {
@@ -190,7 +194,7 @@
         display: grid;
         grid-template-columns: 1fr;
         gap: 10px;
-        margin-top: 22px;
+        margin-top: 14px;
       }
 
       .primary-btn,
@@ -234,6 +238,15 @@
       .hero-panel {
         display: grid;
         gap: 10px;
+      }
+
+      .hero-panel .participant-grid {
+        margin-top: 2px;
+      }
+
+      .hero-panel .participant-grid,
+      .participant-summary-card {
+        width: 100%;
       }
 
       .card,
@@ -427,6 +440,14 @@
         line-height: 1.45;
       }
 
+      .signup-title {
+        color: var(--orange);
+      }
+
+      .tracking-title {
+        color: var(--orange);
+      }
+
       .stats-grid {
         margin-top: 16px;
       }
@@ -450,6 +471,39 @@
       .stat-card small {
         color: var(--brown);
         font-size: 12px;
+      }
+
+      .participant-summary-card {
+        grid-column: 1 / -1;
+        min-height: 106px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .participant-summary-item {
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+        text-align: center;
+      }
+
+      .participant-summary-item strong {
+        color: var(--brown);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .participant-summary-card .number {
+        font-size: 32px;
+      }
+
+      .participant-divider {
+        width: 1px;
+        height: 58px;
+        background: rgba(98, 55, 9, .22);
       }
 
       .form-shell {
@@ -1192,88 +1246,30 @@
         }
       }
 
-      .report-grid {
-        display: grid;
-        gap: 12px;
-      }
-
       .panel {
         padding: 16px;
       }
 
-      .donut-wrap {
-        display: grid;
-        gap: 16px;
-        justify-items: center;
-      }
-
-      .donut {
-        width: 144px;
-        height: 144px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        background: conic-gradient(var(--gold) 0 47%, var(--orange) 47% 81%, #7a3907 81% 100%);
+      .site-footer {
         position: relative;
+        overflow: hidden;
+        margin-top: 12px;
+        padding: 116px 16px 36px;
+        color: var(--brown);
+        background: linear-gradient(180deg, #ffd841 0%, var(--gold) 62%, #f5a900 100%);
       }
 
-      .donut::after {
+      .site-footer::before {
         content: "";
         position: absolute;
-        width: 76px;
-        height: 76px;
-        border-radius: 50%;
-        background: var(--paper);
-      }
-
-      .donut-total {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-        font-weight: 1000;
-        font-size: 31px;
-        line-height: .8;
-      }
-
-      .donut-total small {
-        display: block;
-        margin-top: 6px;
-        font-size: 10px;
-      }
-
-      .legend {
-        width: 100%;
-        display: grid;
-        gap: 12px;
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .legend-row {
-        display: grid;
-        grid-template-columns: 16px 1fr auto;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .legend-dot {
-        width: 11px;
-        height: 11px;
-        border-radius: 50%;
-        background: var(--gold);
-      }
-
-      .legend-dot.up { background: var(--orange); }
-      .legend-dot.go { background: #7a3907; }
-
-      .site-footer {
-        padding: 34px 16px;
-        color: #fff8dd;
-        background:
-          radial-gradient(circle at 16% 0, #6a330a 0 45px, transparent 46px),
-          radial-gradient(circle at 78% 0, #6a330a 0 38px, transparent 39px),
-          linear-gradient(170deg, transparent 0 16%, var(--brown) 17%),
-          var(--brown);
+        left: 50%;
+        top: -86px;
+        width: min(1280px, 160vw);
+        height: 172px;
+        border-radius: 0 0 50% 50% / 0 0 100% 100%;
+        background: var(--white);
+        transform: translateX(-50%);
+        pointer-events: none;
       }
 
       .footer-inner {
@@ -1281,14 +1277,21 @@
         margin: 0 auto;
         display: grid;
         gap: 18px;
+        justify-items: center;
+        text-align: center;
+        align-items: center;
+        position: relative;
+        z-index: 1;
       }
 
-      .footer-seals {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        font-weight: 1000;
-        text-transform: uppercase;
+      .footer-inner > div {
+        max-width: 680px;
+        margin: 0 auto;
+      }
+
+      .footer-inner p {
+        margin-top: 8px;
+        line-height: 1.45;
       }
 
       .toast {
@@ -1332,7 +1335,7 @@
           gap: 42px;
         }
         .hero-copy { text-align: center; }
-        .event-logo { margin-left: auto; }
+        .event-logo { margin: 0 auto -6px; }
         .hero-title { margin-left: auto; }
         .lead { margin-left: 0; }
         .hero-actions {
@@ -1345,20 +1348,11 @@
           grid-template-columns: .92fr 1.08fr;
           align-items: start;
         }
-        .donut-wrap {
-          grid-template-columns: 160px 1fr;
-          justify-items: stretch;
-        }
-        .report-grid {
-          grid-template-columns: 1.1fr .9fr;
-          align-items: start;
-        }
         .class-lists {
           grid-template-columns: repeat(3, 1fr);
         }
         .footer-inner {
-          grid-template-columns: 1fr 1fr;
-          align-items: center;
+          max-width: 760px;
         }
       }
 
@@ -1366,6 +1360,10 @@
         .event-cards,
         .stats-grid {
           grid-template-columns: repeat(4, 1fr);
+        }
+
+        .hero-panel .participant-grid {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -1392,7 +1390,7 @@
           <div class="hero-copy">
             <img class="event-logo" src="/assets/logo-ebf-2026.svg" alt="EBF 2026 - Cristo, o Ungido de Deus. Profeta, sacerdote e rei." />
             <h1 class="sr-only">EBF 2026 - Cristo, o Ungido de Deus</h1>
-            <p class="hero-title">Central de Inscritos EBF 2026 ADS</p>
+            <p class="hero-title">Central de Inscritos <strong>EBF 2026</strong></p>
             <div class="hero-actions">
               <a class="primary-btn" href="#inscricao">+ Nova inscrição</a>
               <a class="secondary-btn" href="#inscritos">&#9776; Ver inscritos</a>
@@ -1401,6 +1399,7 @@
 
           <div class="hero-panel" id="programacao">
             <div class="stats-grid" id="homeStats"></div>
+            <div class="participant-grid" id="participantStats"></div>
           </div>
         </div>
       </section>
@@ -1409,7 +1408,7 @@
         <div class="section-inner form-shell">
           <div class="section-title">
             <p class="eyebrow">Nova inscrição</p>
-            <h2>Cadastre a criança em poucos segundos</h2>
+            <h2 class="signup-title">Cadastre a criança em poucos segundos</h2>
             <p>Os dados são enviados para a planilha da coordenação e também aparecem nesta página para consulta rápida.</p>
           </div>
 
@@ -1469,8 +1468,8 @@
         <div class="section-inner">
           <div class="section-title">
             <p class="eyebrow">Acompanhamento</p>
-            <h2>Inscritos</h2>
-            <p>Consulte os cadastros carregados diretamente das abas START, UP e GO da planilha.</p>
+            <h2 class="tracking-title">Inscritos e Frequência</h2>
+            <p>Consulte os cadastros e marque a frequência.</p>
           </div>
           <div class="sync-row">
             <span id="loadedStatus">Carregando dados da planilha...</span>
@@ -1493,34 +1492,13 @@
         </div>
       </section>
 
-      <section class="section alt" id="relatorios">
-        <div class="section-inner report-grid">
-          <article class="panel">
-            <div class="section-title">
-              <p class="eyebrow">Painel da coordenação</p>
-              <h2>Inscritos por classe</h2>
-            </div>
-            <div class="donut-wrap">
-              <div class="donut"><div class="donut-total"><span id="reportTotal">0</span><small>Total</small></div></div>
-              <div class="legend" id="reportLegend"></div>
-            </div>
-          </article>
-          <div>
-            <div class="participant-grid" id="participantStats"></div>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer">
       <div class="footer-inner">
         <div>
           <strong>EBF 2026 - Cristo, o Ungido de Deus</strong>
-          <p>Site mobile first para inscrições, consulta e acompanhamento da coordenação.</p>
-        </div>
-        <div class="footer-seals">
-          <span>Setadepa</span>
-          <span>Comieadepa</span>
+          <p><strong>Realização:</strong> Assembleia de Deus em Salinópolis e Ministério de Crianças e Adolescentes.</p>
         </div>
       </div>
     </footer>
