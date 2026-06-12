@@ -19,6 +19,7 @@ const btnText = document.getElementById("btnText");
 const searchInput = document.getElementById("searchInput");
 const refreshBtn = document.getElementById("refreshBtn");
 const idadeInput = document.getElementById("idade");
+const telefoneInput = document.getElementById("telefone");
 const classeInput = document.getElementById("classe");
 const classShape = document.getElementById("classShape");
 const classPreview = document.getElementById("classPreview");
@@ -153,7 +154,31 @@ function getClassByAge(age) {
   return "";
 }
 
+function normalizeAgeInput() {
+  const digits = idadeInput.value.replace(/\D/g, "");
+  if (!digits) {
+    idadeInput.value = "";
+    return;
+  }
+
+  const age = Math.min(Number(digits), 15);
+  idadeInput.value = String(age);
+}
+
+function formatPhone(value) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function updatePhoneMask() {
+  telefoneInput.value = formatPhone(telefoneInput.value);
+}
+
 function updateClassPreview() {
+  normalizeAgeInput();
   const classe = getClassByAge(idadeInput.value);
 
   classeInput.value = classe;
@@ -504,6 +529,7 @@ function formDataToRecord() {
 
 function validate(record) {
   const age = Number(record.idade);
+  const phoneDigits = record.telefone.replace(/\D/g, "");
 
   if (!record.nome) return "Informe o nome da criança.";
   if (!record.idade) return "Informe a idade.";
@@ -511,6 +537,7 @@ function validate(record) {
   if (!record.classe) return "Não foi possível identificar o grupo pela idade.";
   if (!record.responsavel) return "Informe o responsável.";
   if (!record.telefone) return "Informe o telefone.";
+  if (phoneDigits.length < 10 || phoneDigits.length > 11) return "Informe um telefone válido com DDD.";
   return "";
 }
 
@@ -603,6 +630,7 @@ loginToggle.addEventListener("click", (event) => {
 });
 refreshBtn.addEventListener("click", () => loadPeople());
 idadeInput.addEventListener("input", updateClassPreview);
+telefoneInput.addEventListener("input", updatePhoneMask);
 prevPeoplePage.addEventListener("click", () => {
   peoplePage -= 1;
   renderList();
