@@ -321,6 +321,88 @@
       .total-shape span:nth-child(3) { background: #764fff; }
       .total-shape span:nth-child(4) { background: var(--gold); }
 
+      .person-icon {
+        width: 30px;
+        height: 30px;
+        display: block;
+        position: relative;
+      }
+
+      .person-icon::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: currentColor;
+        transform: translateX(-50%);
+      }
+
+      .person-icon::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 2px;
+        width: 22px;
+        height: 14px;
+        border-radius: 11px 11px 7px 7px;
+        background: currentColor;
+        transform: translateX(-50%);
+      }
+
+      .person-icon.member {
+        color: var(--brown);
+      }
+
+      .person-icon.visitor {
+        color: var(--brown);
+      }
+
+      .person-icon.visitor span {
+        position: absolute;
+        right: -3px;
+        bottom: 0;
+        z-index: 1;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--brown-soft);
+        box-shadow: 0 0 0 3px rgba(255,255,255,.78);
+      }
+
+      .person-icon.visitor span::before,
+      .person-icon.visitor span::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 8px;
+        height: 2px;
+        border-radius: 999px;
+        background: #fff;
+        transform: translate(-50%, -50%);
+      }
+
+      .person-icon.visitor span::after {
+        width: 2px;
+        height: 8px;
+      }
+
+      .choice:has(input:checked) .person-icon {
+        color: var(--gold);
+      }
+
+      .choice:has(input:checked) .person-icon.visitor span {
+        background: var(--gold-strong);
+      }
+
+      .choice:has(input:checked) .person-icon.visitor span::before,
+      .choice:has(input:checked) .person-icon.visitor span::after {
+        background: var(--brown);
+      }
+
       .card strong,
       .stat-card strong {
         display: block;
@@ -545,6 +627,11 @@
         grid-template-columns: 30px 1fr;
         text-align: left;
         padding: 0 14px;
+      }
+
+      .participant-label {
+        display: block;
+        margin-bottom: 8px;
       }
 
       #cadastroForm .primary-btn {
@@ -977,10 +1064,10 @@
                 <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" autocomplete="tel" required />
               </div>
 
-              <label>Participante é:</label>
+              <label class="participant-label">Participante é:</label>
               <div class="participant-grid" role="radiogroup" aria-label="Participante">
-                <label class="choice"><input type="radio" name="participante" value="Membro" checked /><span class="icon">&#128100;</span><span>Membro</span></label>
-                <label class="choice"><input type="radio" name="participante" value="Visitante" /><span class="icon">&#128100;</span><span>Visitante</span></label>
+                <label class="choice"><input type="radio" name="participante" value="Membro" checked /><span class="person-icon member" aria-hidden="true"></span><span>Membro</span></label>
+                <label class="choice"><input type="radio" name="participante" value="Visitante" /><span class="person-icon visitor" aria-hidden="true"><span></span></span><span>Visitante</span></label>
               </div>
 
               <input id="email" name="email" type="hidden" value="ebf2026@local" />

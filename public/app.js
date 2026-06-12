@@ -77,6 +77,11 @@ function totalIcon() {
   return '<span class="total-shape" aria-hidden="true"><span></span><span></span><span></span><span></span></span>';
 }
 
+function participantIcon(type) {
+  const marker = type === "visitor" ? "<span></span>" : "";
+  return `<span class="person-icon ${type}" aria-hidden="true">${marker}</span>`;
+}
+
 function renderStats() {
   const counts = getCounts();
   document.getElementById("homeStats").innerHTML = [
@@ -87,8 +92,8 @@ function renderStats() {
   ].join("");
 
   document.getElementById("participantStats").innerHTML = [
-    statCard('<span class="icon">&#128101;</span>', "Visitantes", counts.Visitante),
-    statCard('<span class="icon">&#128101;</span>', "Membros", counts.Membro),
+    statCard(participantIcon("visitor"), "Visitantes", counts.Visitante),
+    statCard(participantIcon("member"), "Membros", counts.Membro),
   ].join("");
 
   document.getElementById("totalCard").innerHTML = `<div class="stat-icon">${totalIcon()}</div><div><strong>Total geral</strong><span class="number">${counts.total}</span><small>inscritos</small></div>`;
