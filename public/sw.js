@@ -24,10 +24,10 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Chamadas de API: sempre vai pra rede
+  // Chamadas de API: sempre vai para a rede
   if (url.pathname.startsWith("/api/")) return;
 
-  // Assets estáticos: cache first, fallback pra rede
+  // Assets estáticos: cache first, fallback para a rede
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;

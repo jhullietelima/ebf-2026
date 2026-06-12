@@ -15,6 +15,10 @@ const spinner = document.getElementById("spinner");
 const btnText = document.getElementById("btnText");
 const searchInput = document.getElementById("searchInput");
 const refreshBtn = document.getElementById("refreshBtn");
+const idadeInput = document.getElementById("idade");
+const classeInput = document.getElementById("classe");
+const classShape = document.getElementById("classShape");
+const classPreview = document.getElementById("classPreview");
 let toastTimer;
 
 function showToast(message, type = "success") {
@@ -30,6 +34,22 @@ function updateOnlineStatus() {
 
 function pillClass(classe) {
   return classe === "START" ? "start" : classe === "GO" ? "go" : "";
+}
+
+function getClassByAge(age) {
+  const value = Number(age);
+  if (value >= 3 && value <= 5) return "START";
+  if (value >= 6 && value <= 11) return "UP";
+  if (value >= 12 && value <= 15) return "GO";
+  return "";
+}
+
+function updateClassPreview() {
+  const classe = getClassByAge(idadeInput.value);
+
+  classeInput.value = classe;
+  classShape.className = `group-shape ${classe ? classe.toLowerCase() : "empty"}`;
+  classPreview.textContent = classe || "Grupo";
 }
 
 function getCounts() {
@@ -88,7 +108,7 @@ function renderList() {
   const list = document.getElementById("personList");
 
   if (!people.length) {
-    list.innerHTML = `<article class="panel">Ainda nao ha inscritos carregados da planilha.</article>`;
+    list.innerHTML = `<article class="panel">Ainda não há inscritos carregados da planilha.</article>`;
     return;
   }
 
@@ -102,7 +122,7 @@ function renderList() {
       <div class="avatar">&#128522;</div>
       <div>
         <div class="person-name">${person.nome}</div>
-        <div class="person-age">${person.idade || "-"} anos - ${person.responsavel || "Responsavel nao informado"}</div>
+        <div class="person-age">${person.idade || "-"} anos - ${person.responsavel || "Responsável não informado"}</div>
         <div class="person-age">${person.telefone || ""}</div>
       </div>
       <div>
@@ -135,7 +155,7 @@ function renderClassLists() {
 function renderLoadedStatus() {
   const status = document.getElementById("loadedStatus");
   status.textContent = lastLoadedAt
-    ? `Dados carregados da planilha as ${lastLoadedAt}`
+    ? `Dados carregados da planilha às ${lastLoadedAt}`
     : "Carregando dados da planilha...";
 }
 
@@ -159,7 +179,7 @@ async function loadPeople({ silent = false } = {}) {
     if (!silent) showToast("Lista atualizada com a planilha.");
   } catch (err) {
     renderAll();
-    if (!silent) showToast(err.message || "Nao foi possivel carregar a planilha.", "error");
+    if (!silent) showToast(err.message || "Não foi possível carregar a planilha.", "error");
   } finally {
     if (refreshBtn) refreshBtn.disabled = false;
   }
@@ -168,15 +188,17 @@ async function loadPeople({ silent = false } = {}) {
 function setLoading(loading) {
   submitBtn.disabled = loading;
   spinner.hidden = !loading;
-  btnText.textContent = loading ? "Salvando..." : "Salvar inscricao";
+  btnText.textContent = loading ? "Salvando..." : "Salvar inscrição";
 }
 
 function formDataToRecord() {
+  const classe = getClassByAge(form.idade.value);
+
   return {
     nome: form.nome.value.trim(),
     email: form.email.value,
     idade: form.idade.value.trim(),
-    classe: form.classe.value,
+    classe,
     responsavel: form.responsavel.value.trim(),
     telefone: form.telefone.value.trim(),
     participante: form.participante.value,
@@ -185,9 +207,13 @@ function formDataToRecord() {
 }
 
 function validate(record) {
-  if (!record.nome) return "Informe o nome da crianca.";
+  const age = Number(record.idade);
+
+  if (!record.nome) return "Informe o nome da criança.";
   if (!record.idade) return "Informe a idade.";
-  if (!record.responsavel) return "Informe o responsavel.";
+  if (!Number.isInteger(age) || age < 3 || age > 15) return "A idade deve estar entre 3 e 15 anos.";
+  if (!record.classe) return "Não foi possível identificar o grupo pela idade.";
+  if (!record.responsavel) return "Informe o responsável.";
   if (!record.telefone) return "Informe o telefone.";
   return "";
 }
@@ -215,11 +241,12 @@ form.addEventListener("submit", async (event) => {
     if (!res.ok) throw new Error(data.error || "Erro ao salvar.");
 
     form.reset();
-    showToast(`Inscricao salva na aba ${record.classe}.`);
+    updateClassPreview();
+    showToast(`Inscrição salva na aba ${record.classe}.`);
     await loadPeople({ silent: true });
     document.getElementById("inscritos").scrollIntoView({ behavior: "smooth" });
   } catch (err) {
-    showToast(err.message || "Nao foi possivel salvar na planilha.", "error");
+    showToast(err.message || "Não foi possível salvar na planilha.", "error");
   } finally {
     setLoading(false);
   }
@@ -227,11 +254,12 @@ form.addEventListener("submit", async (event) => {
 
 searchInput.addEventListener("input", renderList);
 refreshBtn.addEventListener("click", () => loadPeople());
+idadeInput.addEventListener("input", updateClassPreview);
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
 
 document.getElementById("exportBtn").addEventListener("click", () => {
-  const header = ["Nome", "Idade", "Classe", "Responsavel", "Telefone", "Participante", "Data"];
+  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Data"];
   const rows = people.map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.createdAt]);
   const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -243,5 +271,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
 });
 
 updateOnlineStatus();
+updateClassPreview();
 renderAll();
 loadPeople({ silent: true });

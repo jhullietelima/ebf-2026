@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffc400" />
-    <meta name="description" content="Inscricoes EBF 2026 - Cristo, o Ungido de Deus" />
+    <meta name="description" content="Inscrições EBF 2026 - Cristo, o Ungido de Deus" />
     <title>EBF 2026</title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
@@ -435,6 +435,75 @@
         box-shadow: inset 0 0 0 2px rgba(255,153,0,.24);
       }
 
+      .age-group-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 128px;
+        gap: 10px;
+        align-items: end;
+        margin-bottom: 15px;
+      }
+
+      .age-group-row .field {
+        margin-bottom: 0;
+      }
+
+      .group-indicator {
+        min-height: 50px;
+        padding: 8px 10px;
+        border: 1px solid rgba(98,55,9,.24);
+        border-radius: 12px;
+        background: rgba(255,255,255,.72);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        color: var(--brown);
+        font-size: 15px;
+        font-weight: 1000;
+        text-transform: uppercase;
+      }
+
+      .group-shape {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        display: block;
+        background: #96d151;
+      }
+
+      .group-shape.start {
+        border-radius: 7px;
+      }
+
+      .group-shape.up {
+        width: 28px;
+        height: 25px;
+        border-radius: 7px;
+        background: #fe9230;
+        clip-path: polygon(50% 4%, 96% 92%, 4% 92%);
+      }
+
+      .group-shape.go {
+        border-radius: 50%;
+        background: #764fff;
+      }
+
+      .group-shape.empty {
+        border-radius: 7px;
+        background: #d7c6ad;
+      }
+
+      @media (max-width: 380px) {
+        .age-group-row {
+          grid-template-columns: 1fr;
+          align-items: stretch;
+        }
+
+        .group-indicator {
+          justify-content: flex-start;
+        }
+      }
+
       .participant-grid .choice {
         min-height: 62px;
         grid-template-columns: 30px 1fr;
@@ -799,11 +868,11 @@
   </head>
   <body>
     <header class="site-header">
-      <nav class="nav" aria-label="Navegacao principal">
+      <nav class="nav" aria-label="Navegação principal">
         <a class="brand-mini" href="#inicio"><span>&#9812;</span><strong>EBF 2026</strong></a>
         <div class="nav-links">
-          <a href="#programacao">Programacao</a>
-          <a href="#inscricao">Inscricao</a>
+          <a href="#programacao">Programação</a>
+          <a href="#inscricao">Inscrição</a>
           <a href="#inscritos">Inscritos</a>
         </div>
         <a class="nav-cta" href="#inscricao">Inscrever</a>
@@ -818,7 +887,7 @@
             <h1 class="sr-only">EBF 2026 - Cristo, o Ungido de Deus</h1>
             <p class="hero-title">Central de Inscritos EBF 2026 ADS</p>
             <div class="hero-actions">
-              <a class="primary-btn" href="#inscricao">+ Nova inscricao</a>
+              <a class="primary-btn" href="#inscricao">+ Nova inscrição</a>
               <a class="secondary-btn" href="#inscritos">&#9776; Ver inscritos</a>
             </div>
           </div>
@@ -832,34 +901,34 @@
       <section class="section alt" id="inscricao">
         <div class="section-inner form-shell">
           <div class="section-title">
-            <p class="eyebrow">Nova inscricao</p>
-            <h2>Cadastre a crianca em poucos segundos</h2>
-            <p>Os dados sao enviados para a planilha da coordenacao e tambem aparecem nesta pagina para consulta rapida.</p>
+            <p class="eyebrow">Nova inscrição</p>
+            <h2>Cadastre a criança em poucos segundos</h2>
+            <p>Os dados são enviados para a planilha da coordenação e também aparecem nesta página para consulta rápida.</p>
           </div>
 
           <article class="panel form-card">
-            <div class="offline-banner" id="offlineBanner">Sem conexao. O envio para a planilha pode falhar.</div>
+            <div class="offline-banner" id="offlineBanner">Sem conexão. O envio para a planilha pode falhar.</div>
             <form id="cadastroForm" novalidate>
               <div class="field">
                 <label for="nome">Nome completo</label>
-                <input id="nome" name="nome" type="text" placeholder="Digite o nome da crianca" autocomplete="name" required />
+                <input id="nome" name="nome" type="text" placeholder="Digite o nome da criança" autocomplete="name" required />
               </div>
+
+              <div class="age-group-row">
+                <div class="field">
+                  <label for="idade">Idade</label>
+                  <input id="idade" name="idade" type="number" min="3" max="15" inputmode="numeric" placeholder="Digite a idade" required />
+                </div>
+                <div class="group-indicator" aria-live="polite" aria-label="Grupo automático">
+                  <span class="group-shape start" id="classShape"></span>
+                  <span id="classPreview">START</span>
+                </div>
+              </div>
+              <input id="classe" name="classe" type="hidden" value="START" />
 
               <div class="field">
-                <label for="idade">Idade</label>
-                <input id="idade" name="idade" type="number" min="1" max="14" inputmode="numeric" placeholder="Digite a idade" required />
-              </div>
-
-              <label>Classe</label>
-              <div class="choice-grid" role="radiogroup" aria-label="Classe">
-                <label class="choice"><input type="radio" name="classe" value="START" checked /><span class="icon">&#11088;</span><span>START</span></label>
-                <label class="choice"><input type="radio" name="classe" value="UP" /><span class="icon">&#128640;</span><span>UP</span></label>
-                <label class="choice"><input type="radio" name="classe" value="GO" /><span class="icon">&#9812;</span><span>GO</span></label>
-              </div>
-
-              <div class="field">
-                <label for="responsavel">Responsavel</label>
-                <input id="responsavel" name="responsavel" type="text" placeholder="Nome do responsavel" required />
+                <label for="responsavel">Responsável</label>
+                <input id="responsavel" name="responsavel" type="text" placeholder="Nome do responsável" required />
               </div>
 
               <div class="field">
@@ -867,7 +936,7 @@
                 <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" autocomplete="tel" required />
               </div>
 
-              <label>Participante e:</label>
+              <label>Participante é:</label>
               <div class="participant-grid" role="radiogroup" aria-label="Participante">
                 <label class="choice"><input type="radio" name="participante" value="Membro" checked /><span class="icon">&#128100;</span><span>Membro</span></label>
                 <label class="choice"><input type="radio" name="participante" value="Visitante" /><span class="icon">&#128100;</span><span>Visitante</span></label>
@@ -878,7 +947,7 @@
 
               <button class="primary-btn" type="submit" id="submitBtn">
                 <span class="spinner" id="spinner" hidden></span>
-                <span id="btnText">Salvar inscricao</span>
+                <span id="btnText">Salvar inscrição</span>
               </button>
             </form>
           </article>
@@ -908,7 +977,7 @@
         <div class="section-inner report-grid">
           <article class="panel">
             <div class="section-title">
-              <p class="eyebrow">Painel da coordenacao</p>
+              <p class="eyebrow">Painel da coordenação</p>
               <h2>Inscritos por classe</h2>
             </div>
             <div class="donut-wrap">
@@ -930,7 +999,7 @@
       <div class="footer-inner">
         <div>
           <strong>EBF 2026 - Cristo, o Ungido de Deus</strong>
-          <p>Site mobile first para inscricoes, consulta e acompanhamento da coordenacao.</p>
+          <p>Site mobile first para inscrições, consulta e acompanhamento da coordenação.</p>
         </div>
         <div class="footer-seals">
           <span>Setadepa</span>

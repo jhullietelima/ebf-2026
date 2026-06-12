@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
   }
 
   if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON || !process.env.SPREADSHEET_ID) {
-    return res.status(500).json({ error: "Variaveis de ambiente nao configuradas." });
+    return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
   }
 
   try {

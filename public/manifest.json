@@ -1,7 +1,7 @@
 {
   "name": "EBF 2026",
   "short_name": "EBF 2026",
-  "description": "Inscricoes da Escola Biblica de Ferias integradas ao Google Sheets",
+  "description": "Inscrições da Escola Bíblica de Férias integradas ao Google Sheets",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fff7df",

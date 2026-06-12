@@ -5,13 +5,21 @@ const HEADERS = [
   "Nome",
   "Idade",
   "Classe",
-  "Responsavel",
+  "Responsável",
   "Telefone",
   "Participante",
   "Email",
-  "Observacao",
+  "Observação",
   "Data",
 ];
+
+function getClassByAge(age) {
+  const value = Number(age);
+  if (Number.isInteger(value) && value >= 3 && value <= 5) return "START";
+  if (Number.isInteger(value) && value >= 6 && value <= 11) return "UP";
+  if (Number.isInteger(value) && value >= 12 && value <= 15) return "GO";
+  return "";
+}
 
 function getSheetsClient() {
   const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -60,25 +68,24 @@ module.exports = async function handler(req, res) {
     nome,
     email,
     idade,
-    classe,
     responsavel,
     telefone,
     participante,
     observacao,
   } = req.body || {};
 
-  const sheetTitle = String(classe || "").toUpperCase();
+  const sheetTitle = getClassByAge(idade);
 
   if (!nome) {
-    return res.status(400).json({ error: "Nome e obrigatorio." });
+    return res.status(400).json({ error: "Nome é obrigatório." });
   }
 
-  if (!CLASSES.includes(sheetTitle)) {
-    return res.status(400).json({ error: "Classe invalida." });
+  if (!sheetTitle || !CLASSES.includes(sheetTitle)) {
+    return res.status(400).json({ error: "Idade deve estar entre 3 e 15 anos." });
   }
 
   if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON || !process.env.SPREADSHEET_ID) {
-    return res.status(500).json({ error: "Variaveis de ambiente nao configuradas." });
+    return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
   }
 
   try {
