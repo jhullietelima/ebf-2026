@@ -8,6 +8,7 @@ let people = [];
 let lastLoadedAt = "";
 let selectedPersonId = "";
 let toastTimer;
+let peoplePage = 0;
 
 const toastEl = document.getElementById("toast");
 const offlineBanner = document.getElementById("offlineBanner");
@@ -26,6 +27,13 @@ const childModal = document.getElementById("childModal");
 const modalBody = document.getElementById("modalBody");
 const modalChildName = document.getElementById("modalChildName");
 const modalClose = document.getElementById("modalClose");
+const recentCount = document.getElementById("recentCount");
+const listPager = document.getElementById("listPager");
+const prevPeoplePage = document.getElementById("prevPeoplePage");
+const nextPeoplePage = document.getElementById("nextPeoplePage");
+const peoplePageStatus = document.getElementById("peoplePageStatus");
+
+const PEOPLE_PAGE_SIZE = 4;
 
 const ATTENDANCE_DAYS = [
   { key: "segunda", label: "Seg" },
@@ -159,6 +167,19 @@ function legendRow(className, label, count, total) {
 function renderList() {
   const term = searchInput.value.trim().toLowerCase();
   const filtered = people.filter((person) => person.nome.toLowerCase().includes(term));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PEOPLE_PAGE_SIZE));
+
+  if (peoplePage >= totalPages) peoplePage = totalPages - 1;
+  if (peoplePage < 0) peoplePage = 0;
+
+  const start = peoplePage * PEOPLE_PAGE_SIZE;
+  const pagePeople = filtered.slice(start, start + PEOPLE_PAGE_SIZE);
+
+  recentCount.textContent = `${filtered.length} ${filtered.length === 1 ? "inscrito" : "inscritos"}`;
+  listPager.classList.toggle("visible", filtered.length > PEOPLE_PAGE_SIZE);
+  prevPeoplePage.disabled = peoplePage === 0;
+  nextPeoplePage.disabled = peoplePage >= totalPages - 1;
+  peoplePageStatus.textContent = `${peoplePage + 1} / ${totalPages}`;
 
   if (!people.length) {
     personList.innerHTML = `<article class="panel">Ainda não há inscritos carregados da planilha.</article>`;
@@ -170,7 +191,7 @@ function renderList() {
     return;
   }
 
-  personList.innerHTML = filtered.map((person) => `
+  personList.innerHTML = pagePeople.map((person) => `
     <button class="person-card" type="button" data-person-id="${person.id}">
       <div class="avatar">&#128522;</div>
       <div>
@@ -386,9 +407,20 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-searchInput.addEventListener("input", renderList);
+searchInput.addEventListener("input", () => {
+  peoplePage = 0;
+  renderList();
+});
 refreshBtn.addEventListener("click", () => loadPeople());
 idadeInput.addEventListener("input", updateClassPreview);
+prevPeoplePage.addEventListener("click", () => {
+  peoplePage -= 1;
+  renderList();
+});
+nextPeoplePage.addEventListener("click", () => {
+  peoplePage += 1;
+  renderList();
+});
 personList.addEventListener("click", (event) => {
   const card = event.target.closest(".person-card");
   if (card) openChildModal(card.dataset.personId);

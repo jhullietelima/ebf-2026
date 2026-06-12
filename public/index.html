@@ -703,6 +703,64 @@
         gap: 10px;
       }
 
+      .recent-head {
+        margin: 2px 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .recent-head h3 {
+        color: var(--brown);
+        font-size: 18px;
+        font-weight: 1000;
+      }
+
+      .recent-head span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .list-pager {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .list-pager.visible {
+        display: flex;
+      }
+
+      .pager-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(98,55,9,.2);
+        border-radius: 50%;
+        background: rgba(255,255,255,.76);
+        color: var(--brown);
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        font-weight: 1000;
+      }
+
+      .pager-btn:disabled {
+        opacity: .42;
+        cursor: not-allowed;
+      }
+
+      .pager-status {
+        min-width: 78px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
       .class-lists {
         display: grid;
         gap: 10px;
@@ -1394,7 +1452,16 @@
             <input id="searchInput" type="search" placeholder="Buscar por nome..." />
             <button class="filter-btn" type="button" aria-label="Filtrar">&#9906;</button>
           </div>
+          <div class="recent-head">
+            <h3>Inscrições recentes</h3>
+            <span id="recentCount">0 inscritos</span>
+          </div>
           <div class="person-list" id="personList"></div>
+          <div class="list-pager" id="listPager" aria-label="Paginação de inscritos">
+            <button class="pager-btn" type="button" id="prevPeoplePage" aria-label="Ver inscrições anteriores">&#8249;</button>
+            <span class="pager-status" id="peoplePageStatus">1 / 1</span>
+            <button class="pager-btn" type="button" id="nextPeoplePage" aria-label="Ver próximas inscrições">&#8250;</button>
+          </div>
         </div>
       </section>
 
