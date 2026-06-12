@@ -211,7 +211,7 @@ function formDataToRecord() {
     responsavel: form.responsavel.value.trim(),
     telefone: form.telefone.value.trim(),
     participante: form.participante.value,
-    observacao: "",
+    observacao: form.observacao.value.trim(),
   };
 }
 
@@ -268,8 +268,8 @@ window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
 
 document.getElementById("exportBtn").addEventListener("click", () => {
-  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Data"];
-  const rows = people.map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.createdAt]);
+  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Observações", "Data"];
+  const rows = people.map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.observacao, p.createdAt]);
   const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");

@@ -421,6 +421,10 @@
         padding: 38px 16px;
       }
 
+      #inscritos {
+        padding-top: 24px;
+      }
+
       .section.alt {
         background:
           radial-gradient(circle at 8% 18%, rgba(255,196,0,.2) 0 50px, transparent 52px),
@@ -956,6 +960,7 @@
           grid-template-columns: 1fr 1fr;
         }
         .section { padding: 58px 24px; }
+        #inscritos { padding-top: 36px; }
         .form-shell {
           grid-template-columns: .92fr 1.08fr;
           align-items: start;
@@ -1064,6 +1069,11 @@
                 <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" autocomplete="tel" required />
               </div>
 
+              <div class="field">
+                <label for="observacao">Observações</label>
+                <textarea id="observacao" name="observacao" placeholder="Alergias, cuidados, restrições ou outras informações importantes"></textarea>
+              </div>
+
               <label class="participant-label">Participante é:</label>
               <div class="participant-grid" role="radiogroup" aria-label="Participante">
                 <label class="choice"><input type="radio" name="participante" value="Membro" checked /><span class="person-icon member" aria-hidden="true"></span><span>Membro</span></label>
@@ -1071,7 +1081,6 @@
               </div>
 
               <input id="email" name="email" type="hidden" value="ebf2026@local" />
-              <textarea id="observacao" name="observacao" hidden></textarea>
 
               <button class="primary-btn" type="submit" id="submitBtn">
                 <span class="spinner" id="spinner" hidden></span>
