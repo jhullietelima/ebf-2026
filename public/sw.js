@@ -1,4 +1,4 @@
-const CACHE_NAME = "ebf-2026-v9";
+const CACHE_NAME = "ebf-2026-v11";
 const STATIC_ASSETS = ["/", "/index.html", "/app.js", "/manifest.json", "/assets/logo-ebf-2026.svg", "/assets/logo-ebf-2026.png"];
 
 // Install: pré-cacheia os assets estáticos

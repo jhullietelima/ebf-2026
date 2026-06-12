@@ -511,12 +511,17 @@
         gap: 18px;
       }
 
-      .logged-in .login-card,
-      .logged-out .protected-section {
+      .logged-in .login-section,
+      .logged-out .protected-section,
+      .logged-out .login-card {
         display: none;
       }
 
-      .logged-in .login-section .section-title p {
+      .logged-out.show-login .login-card {
+        display: block;
+      }
+
+      .logged-out.show-login .access-card {
         display: none;
       }
 
@@ -549,6 +554,19 @@
       #loginForm .primary-btn,
       #accessForm .primary-btn {
         width: 100%;
+      }
+
+      .auth-switch {
+        margin-top: 14px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .auth-switch a {
+        color: var(--orange);
+        font-weight: 900;
       }
 
       .form-card {
@@ -1425,7 +1443,7 @@
       }
     </style>
   </head>
-  <body class="logged-out">
+  <body class="logged-out auth-checking">
     <header class="site-header">
       <nav class="nav" aria-label="Navegação principal">
         <a class="nav-cta" href="#login" id="loginToggle">Login</a>
@@ -1457,7 +1475,7 @@
           <div class="section-title">
             <p class="eyebrow">Acesso</p>
             <h2 class="signup-title">Login da equipe</h2>
-            <p>Entre com o usuário cadastrado na planilha para liberar novas inscrições.</p>
+            <p>Crie um usuário e senha para liberar novas inscrições e o acompanhamento de inscritos.</p>
           </div>
 
           <article class="panel login-card">
@@ -1474,12 +1492,12 @@
                 <span class="spinner" id="loginSpinner" hidden></span>
                 <span id="loginBtnText">Entrar</span>
               </button>
+              <p class="auth-switch">Ainda não tem cadastro? <a href="#login" id="showAccessLink">Cadastre aqui</a></p>
             </form>
           </article>
 
           <article class="panel access-card">
             <h3>Cadastrar acesso</h3>
-            <p>Crie o primeiro acesso da equipe ou, depois de entrar, cadastre novos usuários autorizados.</p>
             <form id="accessForm" novalidate>
               <div class="field">
                 <label for="accessNome">Nome</label>
@@ -1497,6 +1515,7 @@
                 <span class="spinner" id="accessSpinner" hidden></span>
                 <span id="accessBtnText">Cadastrar acesso</span>
               </button>
+              <p class="auth-switch">Já tem cadastro? <a href="#login" id="showLoginLink">Login aqui!</a></p>
             </form>
           </article>
         </div>
