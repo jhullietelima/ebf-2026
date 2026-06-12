@@ -11,6 +11,11 @@ const HEADERS = [
   "Email",
   "Observação",
   "Data",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
 ];
 
 function getClassByAge(age) {
@@ -46,13 +51,14 @@ async function ensureClassSheet(sheets, spreadsheetId, sheetTitle) {
 
   const headerResponse = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `${sheetTitle}!A1:I1`,
+    range: `${sheetTitle}!A1:N1`,
   }).catch(() => ({ data: { values: [] } }));
 
-  if (!headerResponse.data.values || !headerResponse.data.values.length) {
+  const headerValues = headerResponse.data.values?.[0] || [];
+  if (headerValues.length < HEADERS.length) {
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `${sheetTitle}!A1:I1`,
+      range: `${sheetTitle}!A1:N1`,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [HEADERS] },
     });
@@ -97,7 +103,7 @@ module.exports = async function handler(req, res) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${sheetTitle}!A:I`,
+      range: `${sheetTitle}!A:N`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [
@@ -111,6 +117,11 @@ module.exports = async function handler(req, res) {
             email || "",
             observacao || "",
             createdAt,
+            "",
+            "",
+            "",
+            "",
+            "",
           ],
         ],
       },

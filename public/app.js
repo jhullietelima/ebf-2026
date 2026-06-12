@@ -6,6 +6,8 @@ if ("serviceWorker" in navigator) {
 
 let people = [];
 let lastLoadedAt = "";
+let selectedPersonId = "";
+let toastTimer;
 
 const toastEl = document.getElementById("toast");
 const offlineBanner = document.getElementById("offlineBanner");
@@ -19,7 +21,19 @@ const idadeInput = document.getElementById("idade");
 const classeInput = document.getElementById("classe");
 const classShape = document.getElementById("classShape");
 const classPreview = document.getElementById("classPreview");
-let toastTimer;
+const personList = document.getElementById("personList");
+const childModal = document.getElementById("childModal");
+const modalBody = document.getElementById("modalBody");
+const modalChildName = document.getElementById("modalChildName");
+const modalClose = document.getElementById("modalClose");
+
+const ATTENDANCE_DAYS = [
+  { key: "segunda", label: "Seg" },
+  { key: "terca", label: "Ter" },
+  { key: "quarta", label: "Qua" },
+  { key: "quinta", label: "Qui" },
+  { key: "sexta", label: "Sex" },
+];
 
 function showToast(message, type = "success") {
   clearTimeout(toastTimer);
@@ -52,6 +66,17 @@ function updateClassPreview() {
   classPreview.textContent = classe || "Grupo";
 }
 
+function getEmptyAttendance() {
+  return ATTENDANCE_DAYS.reduce((acc, day) => {
+    acc[day.key] = false;
+    return acc;
+  }, {});
+}
+
+function getPersonAttendance(person) {
+  return { ...getEmptyAttendance(), ...(person.frequencia || {}) };
+}
+
 function getCounts() {
   const counts = {
     START: people.filter((p) => p.classe === "START").length,
@@ -80,6 +105,15 @@ function totalIcon() {
 function participantIcon(type) {
   const marker = type === "visitor" ? "<span></span>" : "";
   return `<span class="person-icon ${type}" aria-hidden="true">${marker}</span>`;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function renderStats() {
@@ -114,32 +148,101 @@ function legendRow(className, label, count, total) {
 function renderList() {
   const term = searchInput.value.trim().toLowerCase();
   const filtered = people.filter((person) => person.nome.toLowerCase().includes(term));
-  const list = document.getElementById("personList");
 
   if (!people.length) {
-    list.innerHTML = `<article class="panel">Ainda não há inscritos carregados da planilha.</article>`;
+    personList.innerHTML = `<article class="panel">Ainda não há inscritos carregados da planilha.</article>`;
     return;
   }
 
   if (!filtered.length) {
-    list.innerHTML = `<article class="panel">Nenhum inscrito encontrado.</article>`;
+    personList.innerHTML = `<article class="panel">Nenhum inscrito encontrado.</article>`;
     return;
   }
 
-  list.innerHTML = filtered.map((person) => `
-    <article class="person-card">
+  personList.innerHTML = filtered.map((person) => `
+    <button class="person-card" type="button" data-person-id="${person.id}">
       <div class="avatar">&#128522;</div>
       <div>
-        <div class="person-name">${person.nome}</div>
-        <div class="person-age">${person.idade || "-"} anos - ${person.responsavel || "Responsável não informado"}</div>
-        <div class="person-age">${person.telefone || ""}</div>
+        <div class="person-name">${escapeHtml(person.nome)}</div>
+        <div class="person-age">${escapeHtml(person.idade || "-")} anos - ${escapeHtml(person.responsavel || "Responsável não informado")}</div>
+        <div class="person-age">${escapeHtml(person.telefone || "")}</div>
       </div>
       <div>
-        <span class="pill ${pillClass(person.classe)}">${person.classe}</span>
-        <span class="tag">${person.participante || "Participante"}</span>
+        <span class="pill ${pillClass(person.classe)}">${escapeHtml(person.classe)}</span>
+        <span class="tag">${escapeHtml(person.participante || "Participante")}</span>
       </div>
-    </article>
+    </button>
   `).join("");
+}
+
+function renderChildModal(person) {
+  const attendance = getPersonAttendance(person);
+  const checks = ATTENDANCE_DAYS.map((day) => `
+    <label class="day-check">
+      <input type="checkbox" name="${day.key}" ${attendance[day.key] ? "checked" : ""} />
+      <span>${day.label}</span>
+    </label>
+  `).join("");
+
+  modalChildName.textContent = person.nome || "Criança";
+  modalBody.innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><span>Idade</span><strong>${escapeHtml(person.idade || "-")} anos</strong></div>
+      <div class="detail-item"><span>Grupo</span><strong>${escapeHtml(person.classe || "-")}</strong></div>
+      <div class="detail-item full"><span>Responsável</span><strong>${escapeHtml(person.responsavel || "Não informado")}</strong></div>
+      <div class="detail-item full"><span>Telefone</span><strong>${escapeHtml(person.telefone || "Não informado")}</strong></div>
+      <div class="detail-item full"><span>Observações</span><p>${escapeHtml(person.observacao || "Nenhuma observação registrada.")}</p></div>
+    </div>
+    <div class="attendance">
+      <h4>Frequência</h4>
+      <div class="attendance-grid">${checks}</div>
+    </div>
+  `;
+}
+
+function openChildModal(personId) {
+  const person = people.find((item) => item.id === personId);
+  if (!person) return;
+
+  selectedPersonId = personId;
+  renderChildModal(person);
+  childModal.classList.add("visible");
+  childModal.setAttribute("aria-hidden", "false");
+}
+
+function closeChildModal() {
+  selectedPersonId = "";
+  childModal.classList.remove("visible");
+  childModal.setAttribute("aria-hidden", "true");
+}
+
+async function saveAttendance(person) {
+  const res = await fetch("/api/frequencia", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: person.id,
+      classe: person.classe,
+      frequencia: getPersonAttendance(person),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Erro ao salvar frequência.");
+}
+
+async function updateAttendance(day, checked) {
+  const person = people.find((item) => item.id === selectedPersonId);
+  if (!person) return;
+
+  person.frequencia = getPersonAttendance(person);
+  person.frequencia[day] = checked;
+
+  try {
+    await saveAttendance(person);
+    showToast("Frequência atualizada.");
+  } catch (err) {
+    showToast(err.message || "Não foi possível salvar a frequência.", "error");
+  }
 }
 
 function renderClassLists() {
@@ -264,12 +367,42 @@ form.addEventListener("submit", async (event) => {
 searchInput.addEventListener("input", renderList);
 refreshBtn.addEventListener("click", () => loadPeople());
 idadeInput.addEventListener("input", updateClassPreview);
+personList.addEventListener("click", (event) => {
+  const card = event.target.closest(".person-card");
+  if (card) openChildModal(card.dataset.personId);
+});
+modalClose.addEventListener("click", closeChildModal);
+childModal.addEventListener("click", (event) => {
+  if (event.target === childModal) closeChildModal();
+});
+modalBody.addEventListener("change", (event) => {
+  if (event.target.matches(".attendance-grid input")) {
+    updateAttendance(event.target.name, event.target.checked);
+  }
+});
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
 
 document.getElementById("exportBtn").addEventListener("click", () => {
-  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Observações", "Data"];
-  const rows = people.map((p) => [p.nome, p.idade, p.classe, p.responsavel, p.telefone, p.participante, p.observacao, p.createdAt]);
+  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Observações", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Data"];
+  const rows = people.map((p) => {
+    const attendance = getPersonAttendance(p);
+    return [
+      p.nome,
+      p.idade,
+      p.classe,
+      p.responsavel,
+      p.telefone,
+      p.participante,
+      p.observacao,
+      attendance.segunda ? "Sim" : "",
+      attendance.terca ? "Sim" : "",
+      attendance.quarta ? "Sim" : "",
+      attendance.quinta ? "Sim" : "",
+      attendance.sexta ? "Sim" : "",
+      p.createdAt,
+    ];
+  });
   const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");

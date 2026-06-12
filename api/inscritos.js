@@ -12,6 +12,10 @@ function getSheetsClient() {
   return google.sheets({ version: "v4", auth });
 }
 
+function isPresent(value) {
+  return String(value || "").trim().toLowerCase() === "sim";
+}
+
 function rowToPerson(row, classe, index) {
   return {
     id: `${classe}-${index}`,
@@ -24,6 +28,13 @@ function rowToPerson(row, classe, index) {
     email: row[6] || "",
     observacao: row[7] || "",
     createdAt: row[8] || "",
+    frequencia: {
+      segunda: isPresent(row[9]),
+      terca: isPresent(row[10]),
+      quarta: isPresent(row[11]),
+      quinta: isPresent(row[12]),
+      sexta: isPresent(row[13]),
+    },
   };
 }
 
@@ -44,7 +55,7 @@ module.exports = async function handler(req, res) {
     for (const classe of CLASSES) {
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${classe}!A2:I`,
+        range: `${classe}!A2:N`,
       }).catch(() => ({ data: { values: [] } }));
 
       const rows = response.data.values || [];
