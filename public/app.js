@@ -54,7 +54,10 @@ function updateOnlineStatus() {
 }
 
 function pillClass(classe) {
-  return classe === "START" ? "start" : classe === "GO" ? "go" : "";
+  if (classe === "START") return "start";
+  if (classe === "UP") return "up";
+  if (classe === "GO") return "go";
+  return "";
 }
 
 function getClassByAge(age) {
