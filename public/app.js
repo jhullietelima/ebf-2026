@@ -67,27 +67,31 @@ function getCounts() {
 function statCard(icon, label, value) {
   return `
     <article class="stat-card">
-      <div class="icon">${icon}</div>
+      <div class="stat-icon">${icon}</div>
       <div><strong>${label}</strong><span class="number">${value}</span><small>inscritos</small></div>
     </article>
   `;
 }
 
+function totalIcon() {
+  return '<span class="total-shape" aria-hidden="true"><span></span><span></span><span></span><span></span></span>';
+}
+
 function renderStats() {
   const counts = getCounts();
   document.getElementById("homeStats").innerHTML = [
-    statCard("&#11088;", "START", counts.START),
-    statCard("&#128640;", "UP", counts.UP),
-    statCard("&#9812;", "GO", counts.GO),
-    statCard("&#128101;", "Total geral", counts.total),
+    statCard('<span class="group-shape start"></span>', "START", counts.START),
+    statCard('<span class="group-shape up"></span>', "UP", counts.UP),
+    statCard('<span class="group-shape go"></span>', "GO", counts.GO),
+    statCard(totalIcon(), "Total geral", counts.total),
   ].join("");
 
   document.getElementById("participantStats").innerHTML = [
-    statCard("&#128101;", "Visitantes", counts.Visitante),
-    statCard("&#128101;", "Membros", counts.Membro),
+    statCard('<span class="icon">&#128101;</span>', "Visitantes", counts.Visitante),
+    statCard('<span class="icon">&#128101;</span>', "Membros", counts.Membro),
   ].join("");
 
-  document.getElementById("totalCard").innerHTML = `<div class="icon">&#128101;</div><div><strong>Total geral</strong><span class="number">${counts.total}</span><small>inscritos</small></div>`;
+  document.getElementById("totalCard").innerHTML = `<div class="stat-icon">${totalIcon()}</div><div><strong>Total geral</strong><span class="number">${counts.total}</span><small>inscritos</small></div>`;
   document.getElementById("reportTotal").textContent = counts.total;
   document.getElementById("reportLegend").innerHTML = [
     legendRow("", "START", counts.START, counts.total),
