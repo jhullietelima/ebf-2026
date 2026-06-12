@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="description" content="Cadastro de contatos" />
+    <title>Cadastro</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg:        #0f0f1a;
+        --surface:   #1a1a2e;
+        --border:    #2a2a4a;
+        --accent:    #6c63ff;
+        --accent-h:  #857dff;
+        --text:      #e8e8f0;
+        --muted:     #8888aa;
+        --success:   #22c55e;
+        --error:     #ef4444;
+        --radius:    12px;
+        --font:      'Segoe UI', system-ui, sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 2rem;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      }
+
+      .card-header {
+        margin-bottom: 1.75rem;
+      }
+
+      .card-header h1 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+
+      .card-header p {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 0.3rem;
+      }
+
+      .accent-bar {
+        width: 36px;
+        height: 3px;
+        background: var(--accent);
+        border-radius: 99px;
+        margin-bottom: 0.75rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.1rem;
+      }
+
+      label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      label span.req {
+        color: var(--accent);
+        margin-left: 2px;
+      }
+
+      input, textarea {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 0.95rem;
+        padding: 0.65rem 0.85rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+        width: 100%;
+      }
+
+      input::placeholder, textarea::placeholder { color: var(--muted); }
+
+      input:focus, textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(108,99,255,.18);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-family: var(--font);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: background 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      button[type="submit"]:hover  { background: var(--accent-h); }
+      button[type="submit"]:active { transform: scale(0.98); }
+      button[type="submit"]:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .spinner {
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        padding: 0.7rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.3s;
+        white-space: nowrap;
+        z-index: 99;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .toast.success { background: var(--success); color: #fff; }
+      .toast.error   { background: var(--error);   color: #fff; }
+
+      .offline-banner {
+        display: none;
+        background: #7c3a00;
+        color: #ffd580;
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 0.45rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+      }
+
+      .offline-banner.visible { display: block; }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg:      #f4f4f8;
+          --surface: #ffffff;
+          --border:  #ddddf0;
+          --text:    #1a1a2e;
+          --muted:   #6666aa;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .spinner { animation: none; border-top-color: #fff; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="offline-banner" id="offlineBanner">
+        ⚠️ Sem conexão — o envio ficará pendente
+      </div>
+
+      <div class="card-header">
+        <div class="accent-bar"></div>
+        <h1>Novo Cadastro</h1>
+        <p>Preencha os dados abaixo para registrar o contato.</p>
+      </div>
+
+      <form id="cadastroForm" novalidate>
+        <div class="field">
+          <label for="nome">Nome<span class="req">*</span></label>
+          <input id="nome" name="nome" type="text" placeholder="João Silva" autocomplete="name" required />
+        </div>
+
+        <div class="field">
+          <label for="email">E-mail<span class="req">*</span></label>
+          <input id="email" name="email" type="email" placeholder="joao@email.com" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="telefone">Telefone</label>
+          <input id="telefone" name="telefone" type="tel" placeholder="(91) 99999-9999" autocomplete="tel" />
+        </div>
+
+        <div class="field">
+          <label for="observacao">Observação</label>
+          <textarea id="observacao" name="observacao" placeholder="Alguma informação extra..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          <span class="spinner" id="spinner"></span>
+          <span id="btnText">Cadastrar</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
