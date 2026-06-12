@@ -1,11 +1,11 @@
 {
-  "name": "Cadastro de Contatos",
-  "short_name": "Cadastro",
-  "description": "Cadastro de contatos integrado ao Google Sheets",
+  "name": "EBF 2026",
+  "short_name": "EBF 2026",
+  "description": "Inscricoes da Escola Biblica de Ferias integradas ao Google Sheets",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0f1a",
-  "theme_color": "#1a1a2e",
+  "background_color": "#fff7df",
+  "theme_color": "#ffc400",
   "orientation": "portrait-primary",
   "icons": [
     {

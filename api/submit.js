@@ -5,10 +5,19 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { nome, email, telefone, observacao } = req.body || {};
+  const {
+    nome,
+    email,
+    idade,
+    classe,
+    responsavel,
+    telefone,
+    participante,
+    observacao,
+  } = req.body || {};
 
-  if (!nome || !email) {
-    return res.status(400).json({ error: "Nome e e-mail sao obrigatorios." });
+  if (!nome) {
+    return res.status(400).json({ error: "Nome e obrigatorio." });
   }
 
   if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON || !process.env.SPREADSHEET_ID) {
@@ -27,14 +36,18 @@ module.exports = async function handler(req, res) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SPREADSHEET_ID,
-      range: "A:E",
+      range: "A:I",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [
           [
             nome,
-            email,
+            idade || "",
+            classe || "",
+            responsavel || "",
             telefone || "",
+            participante || "",
+            email || "",
             observacao || "",
             new Date().toLocaleString("pt-BR", { timeZone: "America/Belem" }),
           ],

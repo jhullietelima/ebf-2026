@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-sheets-v1";
+const CACHE_NAME = "ebf-2026-v2";
 const STATIC_ASSETS = ["/", "/index.html", "/app.js", "/manifest.json"];
 
 // Install: pré-cacheia os assets estáticos
