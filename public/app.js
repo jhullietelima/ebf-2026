@@ -9,7 +9,6 @@ let lastLoadedAt = "";
 let selectedPersonId = "";
 let toastTimer;
 let peoplePage = 0;
-let authMode = "access";
 
 const toastEl = document.getElementById("toast");
 const offlineBanner = document.getElementById("offlineBanner");
@@ -40,12 +39,6 @@ const loginBtnText = document.getElementById("loginBtnText");
 const loginToggle = document.getElementById("loginToggle");
 const newRegistrationLink = document.getElementById("newRegistrationLink");
 const trackingLink = document.getElementById("trackingLink");
-const accessForm = document.getElementById("accessForm");
-const accessBtn = document.getElementById("accessBtn");
-const accessSpinner = document.getElementById("accessSpinner");
-const accessBtnText = document.getElementById("accessBtnText");
-const showLoginLink = document.getElementById("showLoginLink");
-const showAccessLink = document.getElementById("showAccessLink");
 
 const AUTH_STORAGE_KEY = "ebf2026Session";
 const PEOPLE_PAGE_SIZE = 4;
@@ -99,19 +92,11 @@ function updateAuthView() {
   const session = getSession();
   document.body.classList.toggle("logged-in", Boolean(session));
   document.body.classList.toggle("logged-out", !session);
-  document.body.classList.toggle("show-login", !session && authMode === "login");
-  document.body.classList.remove("auth-checking");
   loginToggle.textContent = session ? "Sair" : "Login";
   loginToggle.href = session ? "#inicio" : "#login";
   newRegistrationLink.textContent = session ? "+ Nova inscrição" : "Login para inscrever";
   newRegistrationLink.href = session ? "#inscricao" : "#login";
   trackingLink.href = session ? "#inscritos" : "#login";
-}
-
-function showAuthMode(mode) {
-  authMode = mode;
-  updateAuthView();
-  document.getElementById("login").scrollIntoView({ behavior: "smooth" });
 }
 
 function authHeaders() {
@@ -147,12 +132,6 @@ function setLoginLoading(loading) {
   loginBtn.disabled = loading;
   loginSpinner.hidden = !loading;
   loginBtnText.textContent = loading ? "Entrando..." : "Entrar";
-}
-
-function setAccessLoading(loading) {
-  accessBtn.disabled = loading;
-  accessSpinner.hidden = !loading;
-  accessBtnText.textContent = loading ? "Cadastrando..." : "Cadastrar acesso";
 }
 
 function updateOnlineStatus() {
@@ -570,41 +549,6 @@ loginForm.addEventListener("submit", async (event) => {
   }
 });
 
-accessForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const nome = accessForm.nome.value.trim();
-  const usuario = accessForm.usuario.value.trim();
-  const senha = accessForm.senha.value.trim();
-
-  if (!usuario || !senha) {
-    showToast("Informe usuário e senha para cadastrar o acesso.", "error");
-    return;
-  }
-
-  setAccessLoading(true);
-
-  try {
-    const res = await authFetch("/api/acessos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, usuario, senha }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Não foi possível cadastrar o acesso.");
-
-    accessForm.reset();
-    authMode = "login";
-    updateAuthView();
-    showToast("Acesso cadastrado na planilha.");
-    document.getElementById("login").scrollIntoView({ behavior: "smooth" });
-  } catch (err) {
-    showToast(err.message || "Não foi possível cadastrar o acesso.", "error");
-  } finally {
-    setAccessLoading(false);
-  }
-});
-
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -646,29 +590,16 @@ searchInput.addEventListener("input", () => {
   renderList();
 });
 loginToggle.addEventListener("click", (event) => {
-  if (!isAuthenticated()) {
-    event.preventDefault();
-    showAuthMode("login");
-    return;
-  }
+  if (!isAuthenticated()) return;
 
   event.preventDefault();
   clearSession();
-  authMode = "login";
   updateAuthView();
   people = [];
   lastLoadedAt = "";
   renderAll();
   showToast("Sessão encerrada.");
   document.getElementById("login").scrollIntoView({ behavior: "smooth" });
-});
-showLoginLink.addEventListener("click", (event) => {
-  event.preventDefault();
-  showAuthMode("login");
-});
-showAccessLink.addEventListener("click", (event) => {
-  event.preventDefault();
-  showAuthMode("access");
 });
 refreshBtn.addEventListener("click", () => loadPeople());
 idadeInput.addEventListener("input", updateClassPreview);

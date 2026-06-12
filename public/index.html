@@ -512,19 +512,9 @@
       }
 
       .logged-in .login-section,
-      .logged-out .protected-section,
-      .logged-out .login-card {
+      .logged-out .protected-section {
         display: none;
       }
-
-      .logged-out.show-login .login-card {
-        display: block;
-      }
-
-      .logged-out.show-login .access-card {
-        display: none;
-      }
-
 
       .login-shell {
         max-width: 560px;
@@ -534,39 +524,8 @@
         padding: 18px;
       }
 
-      .access-card {
-        padding: 18px;
-      }
-
-      .access-card h3 {
-        margin-bottom: 8px;
-        color: var(--orange);
-        font-size: 18px;
-        font-weight: 900;
-      }
-
-      .access-card p {
-        margin-bottom: 14px;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-
-      #loginForm .primary-btn,
-      #accessForm .primary-btn {
+      #loginForm .primary-btn {
         width: 100%;
-      }
-
-      .auth-switch {
-        margin-top: 14px;
-        text-align: center;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .auth-switch a {
-        color: var(--orange);
-        font-weight: 900;
       }
 
       .form-card {
@@ -1443,7 +1402,7 @@
       }
     </style>
   </head>
-  <body class="logged-out auth-checking">
+  <body class="logged-out">
     <header class="site-header">
       <nav class="nav" aria-label="Navegação principal">
         <a class="nav-cta" href="#login" id="loginToggle">Login</a>
@@ -1475,7 +1434,7 @@
           <div class="section-title">
             <p class="eyebrow">Acesso</p>
             <h2 class="signup-title">Login da equipe</h2>
-            <p>Crie um usuário e senha para liberar novas inscrições e o acompanhamento de inscritos.</p>
+            <p>Entre com o usuário cadastrado na planilha para liberar novas inscrições e o acompanhamento de inscritos.</p>
           </div>
 
           <article class="panel login-card">
@@ -1492,30 +1451,6 @@
                 <span class="spinner" id="loginSpinner" hidden></span>
                 <span id="loginBtnText">Entrar</span>
               </button>
-              <p class="auth-switch">Ainda não tem cadastro? <a href="#login" id="showAccessLink">Cadastre aqui</a></p>
-            </form>
-          </article>
-
-          <article class="panel access-card">
-            <h3>Cadastrar acesso</h3>
-            <form id="accessForm" novalidate>
-              <div class="field">
-                <label for="accessNome">Nome</label>
-                <input id="accessNome" name="nome" type="text" placeholder="Nome da pessoa" autocomplete="name" />
-              </div>
-              <div class="field">
-                <label for="accessUsuario">Usuário</label>
-                <input id="accessUsuario" name="usuario" type="text" placeholder="Crie um usuário" autocomplete="username" required />
-              </div>
-              <div class="field">
-                <label for="accessSenha">Senha</label>
-                <input id="accessSenha" name="senha" type="password" placeholder="Crie uma senha" autocomplete="new-password" required />
-              </div>
-              <button class="primary-btn" type="submit" id="accessBtn">
-                <span class="spinner" id="accessSpinner" hidden></span>
-                <span id="accessBtnText">Cadastrar acesso</span>
-              </button>
-              <p class="auth-switch">Já tem cadastro? <a href="#login" id="showLoginLink">Login aqui!</a></p>
             </form>
           </article>
         </div>
