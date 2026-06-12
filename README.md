@@ -2,6 +2,8 @@
 
 PWA em HTML/CSS/JS puro com serverless function na Vercel que grava direto numa planilha do Google Sheets.
 
+
+
 ---
 
 ## Estrutura do projeto
