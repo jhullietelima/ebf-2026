@@ -164,7 +164,6 @@ function renderStats() {
     statCard(participantIcon("member"), "Membros", counts.Membro),
   ].join("");
 
-  document.getElementById("totalCard").innerHTML = `<div class="stat-icon">${totalIcon()}</div><div><strong>Total geral</strong><span class="number">${counts.total}</span><small>inscritos</small></div>`;
   document.getElementById("reportTotal").textContent = counts.total;
   document.getElementById("reportLegend").innerHTML = [
     legendRow("", "START", counts.START, counts.total),
@@ -353,25 +352,6 @@ async function saveRegistrationEdit() {
   }
 }
 
-function renderClassLists() {
-  const classList = document.getElementById("classLists");
-
-  classList.innerHTML = ["START", "UP", "GO"].map((classe) => {
-    const classPeople = people.filter((person) => person.classe === classe);
-    const names = classPeople.length
-      ? classPeople.map((person) => `<li>${escapeHtml(person.nome)} <span>${escapeHtml(person.idade || "-")} anos</span></li>`).join("")
-      : "<li>Nenhum inscrito ainda</li>";
-
-    return `
-      <article class="panel class-panel">
-        <h3>${classe}</h3>
-        <strong>${classPeople.length} inscritos</strong>
-        <ul>${names}</ul>
-      </article>
-    `;
-  }).join("");
-}
-
 function renderLoadedStatus() {
   const status = document.getElementById("loadedStatus");
   status.textContent = lastLoadedAt
@@ -382,7 +362,6 @@ function renderLoadedStatus() {
 function renderAll() {
   renderStats();
   renderList();
-  renderClassLists();
   renderLoadedStatus();
 }
 
@@ -510,35 +489,6 @@ modalBody.addEventListener("click", (event) => {
 });
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
-
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const header = ["Nome", "Idade", "Classe", "Responsável", "Telefone", "Participante", "Observações", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Data"];
-  const rows = people.map((p) => {
-    const attendance = getPersonAttendance(p);
-    return [
-      p.nome,
-      p.idade,
-      p.classe,
-      p.responsavel,
-      p.telefone,
-      p.participante,
-      p.observacao,
-      attendance.segunda ? "Sim" : "",
-      attendance.terca ? "Sim" : "",
-      attendance.quarta ? "Sim" : "",
-      attendance.quinta ? "Sim" : "",
-      attendance.sexta ? "Sim" : "",
-      p.createdAt,
-    ];
-  });
-  const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "inscritos-ebf-2026.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-});
 
 updateOnlineStatus();
 updateClassPreview();
