@@ -1142,6 +1142,42 @@
         height: 22px;
       }
 
+      .edit-registration.secondary {
+        color: var(--brown);
+        background: rgba(255,255,255,.76);
+        border: 1px solid rgba(98,55,9,.2);
+        box-shadow: none;
+      }
+
+      .edit-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .edit-field {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 10px;
+        border: 1px solid rgba(98,55,9,.22);
+        border-radius: 9px;
+        background: #fff;
+        font-weight: 800;
+      }
+
+      textarea.edit-field {
+        min-height: 76px;
+        resize: vertical;
+        line-height: 1.35;
+      }
+
+      .edit-hint {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
       @media (max-width: 520px) {
         .child-summary {
           grid-template-columns: 76px 1fr;

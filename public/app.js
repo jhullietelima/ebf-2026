@@ -34,7 +34,6 @@ const nextPeoplePage = document.getElementById("nextPeoplePage");
 const peoplePageStatus = document.getElementById("peoplePageStatus");
 
 const PEOPLE_PAGE_SIZE = 4;
-
 const ATTENDANCE_DAYS = [
   { key: "segunda", label: "Seg" },
   { key: "terca", label: "Ter" },
@@ -223,10 +222,24 @@ function renderList() {
   `).join("");
 }
 
-function renderChildModal(person) {
+function renderChildModal(person, editing = false) {
   const attendance = getPersonAttendance(person);
   const participantClass = person.participante === "Visitante" ? "visitor" : "member";
   const groupClass = String(person.classe || "").toLowerCase();
+  const ageDetail = editing
+    ? `<input class="edit-field" id="editAge" type="number" min="3" max="15" value="${escapeHtml(person.idade || "")}" />`
+    : `<strong>${escapeHtml(person.idade || "-")} anos</strong>`;
+  const observationDetail = editing
+    ? `<textarea class="edit-field" id="editObservation">${escapeHtml(person.observacao || "")}</textarea><small class="edit-hint">A idade define automaticamente o grupo ao salvar.</small>`
+    : `<p>${escapeHtml(person.observacao || "Nenhuma observação registrada.")}</p>`;
+  const actionButtons = editing
+    ? `
+      <div class="edit-actions">
+        <button class="edit-registration secondary" type="button" data-action="cancel-edit">Cancelar</button>
+        <button class="edit-registration" type="button" data-action="save-edit">Salvar</button>
+      </div>
+    `
+    : `<button class="edit-registration" type="button" data-action="edit-registration"><span aria-hidden="true">${iconSvg("edit")}</span>Editar Inscrição</button>`;
   const checks = ATTENDANCE_DAYS.map((day) => `
     <label class="day-check">
       <span>${day.label}</span>
@@ -247,16 +260,16 @@ function renderChildModal(person) {
       </div>
     </div>
     <div class="detail-grid">
-      <div class="detail-item"><span class="detail-icon">${iconSvg("calendar")}</span><span>Idade</span><strong>${escapeHtml(person.idade || "-")} anos</strong></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("calendar")}</span><span>Idade</span>${ageDetail}</div>
       <div class="detail-item"><span class="detail-icon">${iconSvg("user")}</span><span>Responsável</span><strong>${escapeHtml(person.responsavel || "Não informado")}</strong></div>
       <div class="detail-item"><span class="detail-icon">${iconSvg("phone")}</span><span>Telefone</span><strong>${escapeHtml(person.telefone || "Não informado")}</strong></div>
-      <div class="detail-item"><span class="detail-icon">${iconSvg("note")}</span><span>Observações</span><p>${escapeHtml(person.observacao || "Nenhuma observação registrada.")}</p></div>
+      <div class="detail-item"><span class="detail-icon">${iconSvg("note")}</span><span>Observações</span>${observationDetail}</div>
     </div>
     <div class="attendance">
       <h4>Frequência</h4>
       <div class="attendance-grid">${checks}</div>
     </div>
-    <button class="edit-registration" type="button"><span aria-hidden="true">${iconSvg("edit")}</span>Editar Inscrição</button>
+    ${actionButtons}
   `;
 }
 
@@ -305,13 +318,48 @@ async function updateAttendance(day, checked) {
   }
 }
 
+async function saveRegistrationEdit() {
+  const person = people.find((item) => item.id === selectedPersonId);
+  if (!person) return;
+
+  const idade = document.getElementById("editAge").value.trim();
+  const observacao = document.getElementById("editObservation").value.trim();
+  const novaClasse = getClassByAge(idade);
+
+  if (!novaClasse) {
+    showToast("A idade deve estar entre 3 e 15 anos.", "error");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/inscricao", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: person.id,
+        classe: person.classe,
+        idade,
+        observacao,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro ao atualizar inscrição.");
+
+    showToast(data.moved ? `Inscrição movida para ${novaClasse}.` : "Inscrição atualizada.");
+    closeChildModal();
+    await loadPeople({ silent: true });
+  } catch (err) {
+    showToast(err.message || "Não foi possível atualizar a inscrição.", "error");
+  }
+}
+
 function renderClassLists() {
   const classList = document.getElementById("classLists");
 
   classList.innerHTML = ["START", "UP", "GO"].map((classe) => {
     const classPeople = people.filter((person) => person.classe === classe);
     const names = classPeople.length
-      ? classPeople.map((person) => `<li>${person.nome} <span>${person.idade || "-"} anos</span></li>`).join("")
+      ? classPeople.map((person) => `<li>${escapeHtml(person.nome)} <span>${escapeHtml(person.idade || "-")} anos</span></li>`).join("")
       : "<li>Nenhum inscrito ainda</li>";
 
     return `
@@ -450,6 +498,15 @@ modalBody.addEventListener("change", (event) => {
   if (event.target.matches(".attendance-grid input")) {
     updateAttendance(event.target.name, event.target.checked);
   }
+});
+modalBody.addEventListener("click", (event) => {
+  const action = event.target.closest("[data-action]")?.dataset.action;
+  const person = people.find((item) => item.id === selectedPersonId);
+  if (!action || !person) return;
+
+  if (action === "edit-registration") renderChildModal(person, true);
+  if (action === "cancel-edit") renderChildModal(person);
+  if (action === "save-edit") saveRegistrationEdit();
 });
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
